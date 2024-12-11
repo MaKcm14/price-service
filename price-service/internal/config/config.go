@@ -12,29 +12,33 @@ type Config struct {
 	DSN string
 }
 
-func configEnv(key string, log *slog.Logger) string {
+func configEnv(key string, log *slog.Logger) (string, error) {
 	env := os.Getenv(key)
 
 	if len(env) == 0 {
 		err := fmt.Errorf("error while parsing the .env file: check the %s var is set correctly", key)
 		log.Error(err.Error())
-		panic(err)
+		return "", err
 	}
 
-	return env
+	return env, nil
 }
 
-func NewConfig(log *slog.Logger) Config {
+func NewConfig(log *slog.Logger) (Config, error) {
 	config := Config{}
 	err := godotenv.Load("../../.env")
 
 	if err != nil {
 		envErr := fmt.Errorf("error while loading the .env file (check it and try again): %v", err)
 		log.Error(envErr.Error())
-		panic(envErr)
+		return Config{}, envErr
 	}
 
-	config.DSN = configEnv("DSN", log)
+	config.DSN, err = configEnv("DSN", log)
 
-	return config
+	if err != nil {
+		return Config{}, err
+	}
+
+	return config, nil
 }
