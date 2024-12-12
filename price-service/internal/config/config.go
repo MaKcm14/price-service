@@ -8,10 +8,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Config sets the application's configurations.
 type Config struct {
 	DSN string
 }
 
+// configEnv gets ENV var. It returns the error if var is unset or unexisting.
 func configEnv(key string, log *slog.Logger) (string, error) {
 	env := os.Getenv(key)
 

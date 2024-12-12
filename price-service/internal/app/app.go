@@ -4,12 +4,17 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/MaKcm14/best-price-service/price-service/internal/config"
+	"github.com/MaKcm14/best-price-service/price-service/internal/controller"
 )
 
+// App unions every parts.
 type App struct {
-	logger  *slog.Logger
-	logFile *os.File
+	appContr *controller.HttpController
+	logger   *slog.Logger
+	logFile  *os.File
 }
 
 func NewApp() *App {
@@ -28,14 +33,17 @@ func NewApp() *App {
 	_ = conf
 
 	return &App{
-		logger:  log,
-		logFile: logFile,
+		appContr: controller.NewHttpController(echo.New(), log),
+		logger:   log,
+		logFile:  logFile,
 	}
 }
 
+// Run starts the configured application.
 func (app *App) Run() {
 	defer app.logFile.Close()
 	defer app.logger.Info("the app was STOPPED")
 
 	app.logger.Info("the app was STARTED")
+	app.appContr.Run()
 }
