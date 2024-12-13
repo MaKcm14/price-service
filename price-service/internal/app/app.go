@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"log/slog"
 	"os"
 
@@ -8,6 +9,7 @@ import (
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/config"
 	"github.com/MaKcm14/best-price-service/price-service/internal/controller"
+	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 )
 
 // App unions every parts.
@@ -18,10 +20,11 @@ type App struct {
 }
 
 func NewApp() *App {
+	ctx := context.Background()
 	logFile, _ := os.Create("log.txt")
 	log := slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
-	log.Info("configuring begun")
+	log.Info("main application's configuring begun")
 
 	conf, err := config.NewConfig(log)
 
@@ -33,7 +36,7 @@ func NewApp() *App {
 	_ = conf
 
 	return &App{
-		appContr: controller.NewHttpController(echo.New(), log),
+		appContr: controller.NewHttpController(echo.New(), log, services.NewFilter(log, ctx)),
 		logger:   log,
 		logFile:  logFile,
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 	"github.com/labstack/echo/v4"
 )
 
@@ -11,12 +12,14 @@ import (
 type HttpController struct {
 	contr  *echo.Echo
 	logger *slog.Logger
+	filter services.Filter
 }
 
-func NewHttpController(contr *echo.Echo, logger *slog.Logger) *HttpController {
+func NewHttpController(contr *echo.Echo, logger *slog.Logger, filter services.Filter) *HttpController {
 	return &HttpController{
 		contr:  contr,
 		logger: logger,
+		filter: filter,
 	}
 }
 
@@ -35,9 +38,10 @@ func (httpContr *HttpController) Run() {
 }
 
 func (httpContr *HttpController) configPath() {
-	httpContr.contr.GET("/products/filter/:product_name", httpContr.filterByPriceUpDown)
-	httpContr.contr.GET("/products/filter/best-price/:product_name", httpContr.filterByBestPrice)
-	httpContr.contr.GET("/products/filter/exact-price/:product_name", httpContr.filterByExactPrice)
+	httpContr.contr.GET("/products/filter/price/price-range/:product_name", httpContr.filterByPriceUpDown)
+	httpContr.contr.GET("/products/filter/price/best-price/:product_name", httpContr.filterByBestPrice)
+	httpContr.contr.GET("/products/filter/price/exact-price/:product_name", httpContr.filterByExactPrice)
+	httpContr.contr.GET("/products/filter/markets/:product_name", httpContr.filterByMarkets)
 }
 
 // filterByPriceUpDown defines the logic of the handling the filter-by-price-down-up requests.
@@ -52,5 +56,10 @@ func (httpContr *HttpController) filterByBestPrice(cont echo.Context) error {
 
 // filterByExactPrice defines the logic of the handling the filter-by-set-price requests.
 func (httpContr *HttpController) filterByExactPrice(cont echo.Context) error {
+	return nil
+}
+
+// filterByMarkets defines the logic of the handling the filter-by-markets requests.
+func (httpContr *HttpController) filterByMarkets(cont echo.Context) error {
 	return nil
 }
