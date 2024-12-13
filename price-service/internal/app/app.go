@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"log/slog"
 	"os"
 
@@ -20,7 +19,6 @@ type App struct {
 }
 
 func NewApp() *App {
-	ctx := context.Background()
 	logFile, _ := os.Create("log.txt")
 	log := slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
@@ -36,7 +34,7 @@ func NewApp() *App {
 	_ = conf
 
 	return &App{
-		appContr: controller.NewHttpController(echo.New(), log, services.NewFilter(log, ctx)),
+		appContr: controller.NewHttpController(echo.New(), log, services.NewFilter(log)),
 		logger:   log,
 		logFile:  logFile,
 	}

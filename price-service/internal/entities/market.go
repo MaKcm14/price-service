@@ -1,6 +1,10 @@
 package entities
 
-type Market struct {
-	ID   int
-	Name string
-}
+type Market int
+
+const (
+	YandexMarket Market = iota
+	Ozon
+	Avito
+	Wildberries
+)
