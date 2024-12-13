@@ -94,23 +94,25 @@ func (httpContr *HttpController) filterByPriceUpDown(cont echo.Context) error {
 	requestInfo, err := httpContr.validProductRequest(cont)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, err).Error())
-		return cont.JSON(http.StatusBadRequest, ResponseErr{err.Error()})
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 	priceDown, _ := strconv.Atoi(cont.QueryParam("price_down"))
 	priceUp, _ := strconv.Atoi(cont.QueryParam("price_up"))
 
 	if priceDown < 0 || priceUp < 0 || priceUp < priceDown {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, ErrRequestInfo).Error())
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrRequestInfo))
 		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
 	products, err := httpContr.filter.FilterByPriceRange(requestInfo, priceDown, priceUp)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, err).Error())
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return cont.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
+
+	cont.Request().Header.Set("Cache-Control", "public,max-age=43200")
 
 	return cont.JSON(http.StatusOK, products)
 }
@@ -122,16 +124,18 @@ func (httpContr *HttpController) filterByBestPrice(cont echo.Context) error {
 	requestInfo, err := httpContr.validProductRequest(cont)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, err).Error())
-		return cont.JSON(http.StatusBadRequest, ResponseErr{err.Error()})
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
 	products, err := httpContr.filter.FilterByBestPrice(requestInfo)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, err).Error())
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return cont.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
+
+	cont.Request().Header.Set("Cache-Control", "public,max-age=43200")
 
 	return cont.JSON(http.StatusOK, products)
 }
@@ -143,23 +147,25 @@ func (httpContr *HttpController) filterByExactPrice(cont echo.Context) error {
 	requestInfo, err := httpContr.validProductRequest(cont)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, err).Error())
-		return cont.JSON(http.StatusBadRequest, ResponseErr{err.Error()})
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
 	exactPrice, _ := strconv.Atoi(cont.QueryParam("price"))
 
 	if exactPrice <= 0 {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, ErrRequestInfo).Error())
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrRequestInfo))
 		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
 	products, err := httpContr.filter.FilterByExactPrice(requestInfo, exactPrice)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, err).Error())
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return cont.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
+
+	cont.Request().Header.Set("Cache-Control", "public,max-age=43200")
 
 	return cont.JSON(http.StatusOK, products)
 }
@@ -171,16 +177,18 @@ func (httpContr *HttpController) filterByMarkets(cont echo.Context) error {
 	requestInfo, err := httpContr.validProductRequest(cont)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, err).Error())
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
 	products, err := httpContr.filter.FilterByMarkets(requestInfo)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Errorf("error of the %v: %v", filterType, ErrServerHandling).Error())
+		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrServerHandling))
 		return cont.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
+
+	cont.Request().Header.Set("Cache-Control", "public,max-age=43200")
 
 	return cont.JSON(http.StatusOK, products)
 }
