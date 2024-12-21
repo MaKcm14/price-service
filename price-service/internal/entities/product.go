@@ -1,10 +1,13 @@
 package entities
 
 type Product struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       int    `json:"price"`
-	URL         string `json:"url"`
-	Market      string `json:"market"`
-	Image       []byte `json:"image"`
+	Name          string `json:"name"`
+	Brand         string `json:"brand"`
+	BasePrice     int    `json:"base_price"`
+	DiscountPrice int    `json:"discount_price"`
+	Discount      int    `json:"discount"`
+	URL           string `json:"url"`
+	Market        string `json:"market"`
+	Supplier      string `json:"supplier"`
+	Image         []byte `json:"image"`
 }

@@ -52,36 +52,43 @@ func (httpContr *HttpController) configPath() {
 	httpContr.contr.GET("/products/filter/price/best-price/:product_name", httpContr.filterByBestPrice)
 	httpContr.contr.GET("/products/filter/price/exact-price/:product_name", httpContr.filterByExactPrice)
 	httpContr.contr.GET("/products/filter/markets/:product_name", httpContr.filterByMarkets)
+
+	httpContr.contr.HTTPErrorHandler = func(err error, cont echo.Context) {
+		if httpErr, flagCheck := err.(*echo.HTTPError); flagCheck {
+			if httpErr.Code == http.StatusNotFound {
+				httpContr.logger.Warn("the wrong request path was got")
+				cont.JSON(http.StatusNotFound, ResponseErr{ErrRequestPath.Error()})
+			}
+		}
+	}
 }
 
-func (httpContr *HttpController) validProductRequest(cont echo.Context) (services.ProductRequest, error) {
-	product := services.NewProductRequest()
+func (httpContr *HttpController) validProductRequest(cont echo.Context) (entities.ProductRequest, error) {
+	product := entities.NewProductRequest()
 
 	product.ProductName = cont.Param("product_name")
 
 	sample, _ := strconv.Atoi(cont.QueryParam("sample"))
 
 	if sample < 0 {
-		return services.ProductRequest{}, ErrRequestInfo
+		return entities.ProductRequest{}, ErrRequestInfo
 	}
 	product.Sample = sample
 
 	markets := cont.QueryParam("markets")
 
 	for _, market := range strings.Split(markets, " ") {
-		if market == "avito" {
-			product.Markets = append(product.Markets, entities.Avito)
-		} else if market == "wildberries" {
+		if market == "wildberries" {
 			product.Markets = append(product.Markets, entities.Wildberries)
-		} else if market == "yandex_market" {
-			product.Markets = append(product.Markets, entities.YandexMarket)
 		} else if market == "ozon" {
 			product.Markets = append(product.Markets, entities.Ozon)
+		} else if market == "megamarket" {
+			product.Markets = append(product.Markets, entities.MegaMarket)
 		}
 	}
 
 	if len(markets) == 0 {
-		return services.ProductRequest{}, ErrRequestInfo
+		return entities.ProductRequest{}, ErrRequestInfo
 	}
 
 	return product, nil
