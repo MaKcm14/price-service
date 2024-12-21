@@ -35,6 +35,9 @@ func NewHttpController(contr *echo.Echo, logger *slog.Logger, filter services.Fi
 
 // Run configures and starts the http-server.
 func (httpContr *HttpController) Run() {
+	defer httpContr.logger.Info("the http-server was stopped")
+	defer httpContr.contr.Close()
+
 	httpContr.logger.Info("configuring and starting the http-server begun")
 
 	httpContr.configPath()

@@ -19,13 +19,13 @@ type MarketsApi struct {
 func NewMarketsApi(log *slog.Logger) MarketsApi {
 	return MarketsApi{
 		logger: log,
-		wildb:  NewWildberriesAPI(log, 10000),
+		wildb:  NewWildberriesAPI(log, 1000),
 	}
 }
 
 // GetProducts defines getting the products from the needed markets, that set in ProductRequest DTO.
-func (api MarketsApi) GetProducts(product entities.ProductRequest) {
+func (api MarketsApi) GetProducts(product entities.ProductRequest) ([]entities.Product, error) {
 	// DEBUG:
-	api.wildb.GetProducts(product)
+	return api.wildb.GetProducts(product)
 	// TODO: check this
 }

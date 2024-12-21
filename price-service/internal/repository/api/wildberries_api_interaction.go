@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
+	"github.com/anaskhan96/soup"
+	"github.com/chromedp/chromedp"
 )
 
 type (
@@ -43,35 +46,66 @@ func NewWildberriesAPI(log *slog.Logger, scroll int) WildberriesAPI {
 
 // getHtmlPage gets the raw html using the filters and the main url's template.
 func (api WildberriesAPI) getHtmlPage(product entities.ProductRequest, filters ...string) (string, error) {
+	const serviceType = "wildberries.service"
 	var html string
 
-	/*
-		err := chromedp.Run(context.Background(),
-			chromedp.Navigate(fmt.Sprintf("https://www.wildberries.ru/catalog/0/search.aspx?&search=%s%s",
-				api.converter.convertToURLView(product.ProductName), api.converter.convertFilters(filters))),
-			chromedp.Evaluate(fmt.Sprintf("window.scrollBy(0, %v)", api.scroll), nil),
-			chromedp.OuterHTML("html", &html),
-		)
+	ctx, cancel := chromedp.NewContext(context.Background())
+	defer cancel()
 
-		if err != nil {
-			api.logger.Error(fmt.Sprintf("%v: %v", ErrChromeDriver, err))
-			return "", fmt.Errorf("%v: %v", ErrChromeDriver, err)
-		}
-	*/
+	_, err := chromedp.RunResponse(ctx,
+		chromedp.Navigate(fmt.Sprintf("https://www.wildberries.ru/catalog/0/search.aspx?%s",
+			api.getOpenApiPath(product, filters))),
+		chromedp.InnerHTML("[class='product-card-list']", &html),
+	)
+
+	///DEBUG:
+	//file, err := os.Create("../../internal/repository/api/test.html")
+	//file.Write([]byte(html))
+	//defer file.Close()
+	///TODO: delete
+
+	if err != nil {
+		api.logger.Error(fmt.Sprintf("error of the %s: %v: %v", serviceType, ErrChromeDriver, err))
+		return "", fmt.Errorf("%v: %v", ErrChromeDriver, err)
+	}
 
 	return html, nil
 }
 
-// parseHtmlForImage gets the image's links for products.
-func (api WildberriesAPI) parseHtmlForImage(html string) ([]string, error) {
-	///DEBUG:
-	fmt.Println(html)
-	///TODO: delete
-	return nil, nil
+// getImageLinks gets image links for the products.
+func (api WildberriesAPI) getImageLinks(html string) []string {
+	var imageLinks = make([]string, 0, 750)
+	var parse = soup.HTMLParse(html)
+
+	for _, tag := range parse.FindAll("article") {
+		link := tag.Find("img", "class", "j-thumbnail")
+		imageLinks = append(imageLinks, link.Attrs()["src"])
+	}
+
+	return imageLinks
 }
 
-// composeURLPath returns the correct URL's path for wildberries API.
-func (api WildberriesAPI) composeURLPath(product entities.ProductRequest, filters []string) string {
+// getOpenApiPath returns the correct URL's path for wildberries open API.
+// It uses with domain "www.wildberries.ru"
+func (api WildberriesAPI) getOpenApiPath(product entities.ProductRequest, filters []string) string {
+	var path string
+	filtersURL := api.converter.getFilters(filters)
+
+	path += fmt.Sprintf("page=%d", product.Sample)
+	path += "&sort=" + filtersURL["sort"]
+
+	if priceRange, flagExist := filtersURL["priceU"]; flagExist {
+		path += "&priceU=" + priceRange
+	}
+
+	path += "&search=" + strings.Join(strings.Split(product.ProductName, " "), "+")
+
+	return path
+}
+
+// getHiddenApiPath returns the correct URL's path for wildberries hidden API.
+// It uses with domain "search.wb.ru"
+func (api WildberriesAPI) getHiddenApiPath(product entities.ProductRequest, filters []string) string {
 	var path string
 	filtersURL := api.converter.getFilters(filters)
 
@@ -96,7 +130,7 @@ func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters .
 
 	resp, err := http.Get(fmt.Sprintf("https://search.wb.ru/exactmatch/ru/common/v9/search?"+
 		"ab_testing=false&appType=1&curr=rub&dest=-1257786&hide_dtype=10&lang=ru&%s",
-		api.composeURLPath(product, filters)),
+		api.getHiddenApiPath(product, filters)),
 	)
 
 	if err != nil || resp.StatusCode > 299 {
@@ -141,8 +175,17 @@ func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters .
 		return nil, nil
 	}
 
-	// TODO: get url for image data
-	for _, product := range respProd.Data.Products {
+	html, err := api.getHtmlPage(product, filters...)
+	imageLinks := api.getImageLinks(html)
+
+	for i := 0; i != len(respProd.Data.Products); i++ {
+		var imageLink = ""
+		var product = respProd.Data.Products[i]
+
+		if i < len(imageLinks) {
+			imageLink = imageLinks[i]
+		}
+
 		discount := (product.Sizes[0].Price.Basic/100 - product.Sizes[0].Price.Total/100) * 100
 		discount /= product.Sizes[0].Price.Basic / 100
 
@@ -155,6 +198,7 @@ func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters .
 			URL:           fmt.Sprintf("https://www.wildberries.ru/catalog/%v/detail.aspx", product.ID),
 			Market:        Wildberries,
 			Supplier:      product.Supplier,
+			ImageLink:     imageLink,
 		})
 	}
 
@@ -162,6 +206,6 @@ func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters .
 }
 
 // GetProducts gets the products without any filters.
-func (api WildberriesAPI) GetProducts(product entities.ProductRequest) {
-	api.getProducts(product, "sort", "popular")
+func (api WildberriesAPI) GetProducts(product entities.ProductRequest) ([]entities.Product, error) {
+	return api.getProducts(product, "sort", "popular")
 }

@@ -22,8 +22,7 @@ func NewFilter(log *slog.Logger) *ProductsFilter {
 // FilterByMarkets defines the logic of the getting and processing the products' sample
 // from the markets' responses filtered only by markets.
 func (filter *ProductsFilter) FilterByMarkets(product entities.ProductRequest) ([]entities.Product, error) {
-	filter.api.GetProducts(product)
-	return nil, nil
+	return filter.api.GetProducts(product)
 }
 
 // FilterByPriceRange defines the logic of the getting and processing the products' sample

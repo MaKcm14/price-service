@@ -9,5 +9,5 @@ type Product struct {
 	URL           string `json:"url"`
 	Market        string `json:"market"`
 	Supplier      string `json:"supplier"`
-	Image         []byte `json:"image"`
+	ImageLink     string `json:"image_link"`
 }
