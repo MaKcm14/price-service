@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log/slog"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
@@ -22,7 +23,14 @@ func NewFilter(log *slog.Logger) *ProductsFilter {
 // FilterByMarkets defines the logic of the getting and processing the products' sample
 // from the markets' responses filtered only by markets.
 func (filter *ProductsFilter) FilterByMarkets(product entities.ProductRequest) ([]entities.Product, error) {
-	return filter.api.GetProducts(product)
+	const serviceType = "filter.service.filter_by_markets"
+	products, err := filter.api.GetProducts(product)
+
+	if err != nil {
+		return nil, fmt.Errorf("error of the %v: %v", serviceType, err)
+	}
+
+	return products, nil
 }
 
 // FilterByPriceRange defines the logic of the getting and processing the products' sample
