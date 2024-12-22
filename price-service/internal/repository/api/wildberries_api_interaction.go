@@ -33,15 +33,13 @@ type (
 	}
 
 	WildberriesAPI struct {
-		scroll    int
 		converter urlConverter
 		logger    *slog.Logger
 	}
 )
 
-func NewWildberriesAPI(log *slog.Logger, scroll int) WildberriesAPI {
+func NewWildberriesAPI(log *slog.Logger) WildberriesAPI {
 	return WildberriesAPI{
-		scroll: scroll,
 		logger: log,
 	}
 }
@@ -81,6 +79,13 @@ func (api WildberriesAPI) getHtmlPage(product entities.ProductRequest, filters .
 
 // getImageLinks gets image links for the products.
 func (api WildberriesAPI) getImageLinks(html string) []string {
+	const serviceType = "wildberries.service"
+
+	if !strings.Contains(html, "article") {
+		api.logger.Warn(fmt.Sprintf("error of the %v: %v: images couldn't be load", serviceType, ErrServiceResponse))
+		return nil
+	}
+
 	var imageLinks = make([]string, 0, 750)
 	var parse = soup.HTMLParse(html)
 
@@ -129,13 +134,8 @@ func (api WildberriesAPI) getHiddenApiPath(product entities.ProductRequest, filt
 	return path
 }
 
-// getProducts is the main function of getting the products with set filters.
-// The current geo-string defines the Moscow info.
-func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters ...string) ([]entities.Product, error) {
+func (api WildberriesAPI) getResponse(url string) ([]WildberriesProduct, error) {
 	const serviceType = "wildberries.service"
-	var products = make([]entities.Product, 0, 750)
-	var resp *http.Response
-
 	respProd := struct {
 		Data struct {
 			Products []WildberriesProduct `json:"products"`
@@ -147,19 +147,13 @@ func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters .
 			make([]WildberriesProduct, 0, 750),
 		},
 	}
-
 	respBody := make([]byte, 0, 200000)
 
 	for len(respProd.Data.Products) < 10 {
 		respBody = respBody[:0]
 		respProd.Data.Products = respProd.Data.Products[:0]
 
-		var err error
-
-		resp, err = http.Get(fmt.Sprintf("https://search.wb.ru/exactmatch/ru/common/v9/search?"+
-			"ab_testing=false&appType=1&curr=rub&dest=-1257786&hide_dtype=10&lang=ru&%s",
-			api.getHiddenApiPath(product, filters)),
-		)
+		resp, err := http.Get(url)
 
 		if err != nil || resp.StatusCode > 299 {
 			api.logger.Warn(fmt.Sprintf("error of the %v: %v: %v", serviceType, ErrServiceResponse, err))
@@ -173,7 +167,6 @@ func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters .
 
 			if n != 0 && (err == nil || err == io.EOF) {
 				respBody = append(respBody, buffer[:n]...)
-				continue
 			} else if err != nil && err != io.EOF {
 				api.logger.Warn(fmt.Sprintf("error of the %v: %v: %v", serviceType, ErrBufferReading, err))
 				return nil, fmt.Errorf("%v: %v", ErrBufferReading, err)
@@ -189,8 +182,31 @@ func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters .
 			return nil, nil
 		}
 	}
+	return respProd.Data.Products, nil
+}
 
+// getProducts is the main function of getting the products with set filters.
+// The current geo-string defines the Moscow info.
+func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters ...string) ([]entities.Product, error) {
+	const serviceType = "wildberries.service"
+	var products = make([]entities.Product, 0, 750)
+
+	respProd, err := api.getResponse(fmt.Sprintf("https://search.wb.ru/exactmatch/ru/common/v9/search?"+
+		"ab_testing=false&appType=1&curr=rub&dest=-1257786&hide_dtype=10&lang=ru&%s",
+		api.getHiddenApiPath(product, filters)))
+
+	if err != nil {
+		return nil, err
+	}
+
+	///DEBUG:
+	var timeDur = time.Now()
+	///TODO: delete
 	html, err := api.getHtmlPage(product, filters...)
+
+	///DEBUG:
+	fmt.Printf("getHtml: %v\n", time.Since(timeDur).Milliseconds())
+	///TODO: delete
 
 	if err != nil {
 		return nil, err
@@ -198,17 +214,22 @@ func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters .
 
 	imageLinks := api.getImageLinks(html)
 
-	for i := 0; i != len(respProd.Data.Products); i++ {
-		var product = respProd.Data.Products[i]
+	for i, j := 0, 0; i != len(respProd); i++ {
+		var imageLink string
+
+		if j < len(imageLinks) {
+			imageLink = imageLinks[j]
+			j++
+		}
 
 		products = append(products, entities.Product{
-			Name:      product.Name,
-			Brand:     product.Brand,
-			Price:     entities.NewPrice(product.Sizes[0].Price.Basic/100, product.Sizes[0].Price.Total/100),
-			URL:       fmt.Sprintf("https://www.wildberries.ru/catalog/%v/detail.aspx", product.ID),
+			Name:      respProd[i].Name,
+			Brand:     respProd[i].Brand,
+			Price:     entities.NewPrice(respProd[i].Sizes[0].Price.Basic/100, respProd[i].Sizes[0].Price.Total/100),
+			URL:       fmt.Sprintf("https://www.wildberries.ru/catalog/%v/detail.aspx", respProd[i].ID),
 			Market:    Wildberries,
-			Supplier:  product.Supplier,
-			ImageLink: imageLinks[i],
+			Supplier:  respProd[i].Supplier,
+			ImageLink: imageLink,
 		})
 	}
 
