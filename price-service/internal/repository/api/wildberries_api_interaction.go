@@ -199,14 +199,7 @@ func (api WildberriesAPI) getProducts(product entities.ProductRequest, filters .
 		return nil, err
 	}
 
-	///DEBUG:
-	var timeDur = time.Now()
-	///TODO: delete
 	html, err := api.getHtmlPage(product, filters...)
-
-	///DEBUG:
-	fmt.Printf("getHtml: %v\n", time.Since(timeDur).Milliseconds())
-	///TODO: delete
 
 	if err != nil {
 		return nil, err
