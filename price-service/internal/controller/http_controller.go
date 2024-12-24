@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
-	"github.com/labstack/echo/v4"
 )
 
 type (
@@ -66,19 +67,19 @@ func (httpContr *HttpController) configPath() {
 	}
 }
 
-func (httpContr *HttpController) validProductRequest(cont echo.Context) (entities.ProductRequest, error) {
+func (httpContr *HttpController) validProductRequest(ctx echo.Context) (entities.ProductRequest, error) {
 	product := entities.NewProductRequest()
 
-	product.ProductName = cont.Param("product_name")
+	product.ProductName = ctx.Param("product_name")
 
-	sample, _ := strconv.Atoi(cont.QueryParam("sample"))
+	sample, _ := strconv.Atoi(ctx.QueryParam("sample"))
 
 	if sample < 0 {
 		return entities.ProductRequest{}, ErrRequestInfo
 	}
 	product.Sample = sample
 
-	markets := cont.QueryParam("markets")
+	markets := ctx.QueryParam("markets")
 
 	for _, market := range strings.Split(markets, " ") {
 		if market == "wildberries" {
@@ -98,107 +99,107 @@ func (httpContr *HttpController) validProductRequest(cont echo.Context) (entitie
 }
 
 // filterByPriceUpDown defines the logic of the handling the filter-by-price-down-up requests.
-func (httpContr *HttpController) filterByPriceUpDown(cont echo.Context) error {
+func (httpContr *HttpController) filterByPriceUpDown(ctx echo.Context) error {
 	const filterType = "price-range-filter"
 
-	requestInfo, err := httpContr.validProductRequest(cont)
+	requestInfo, err := httpContr.validProductRequest(ctx)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
-		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
+		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
-	priceDown, _ := strconv.Atoi(cont.QueryParam("price_down"))
-	priceUp, _ := strconv.Atoi(cont.QueryParam("price_up"))
+	priceDown, _ := strconv.Atoi(ctx.QueryParam("price_down"))
+	priceUp, _ := strconv.Atoi(ctx.QueryParam("price_up"))
 
 	if priceDown < 0 || priceUp < 0 || priceUp < priceDown {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrRequestInfo))
-		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
+		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	products, err := httpContr.filter.FilterByPriceRange(requestInfo, priceDown, priceUp)
+	products, err := httpContr.filter.FilterByPriceRange(ctx, requestInfo, priceDown, priceUp)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
-		return cont.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
+		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	cont.Request().Header.Set("Cache-Control", "public,max-age=43200")
+	ctx.Request().Header.Set("Cache-Control", "public,max-age=43200")
 
-	return cont.JSON(http.StatusOK, products)
+	return ctx.JSON(http.StatusOK, products)
 }
 
 // filterByBestPrice defines the logic of the handling the filter-by-minimal-price requests.
-func (httpContr *HttpController) filterByBestPrice(cont echo.Context) error {
+func (httpContr *HttpController) filterByBestPrice(ctx echo.Context) error {
 	const filterType = "best-price-filter"
 
-	requestInfo, err := httpContr.validProductRequest(cont)
+	requestInfo, err := httpContr.validProductRequest(ctx)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
-		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
+		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	products, err := httpContr.filter.FilterByBestPrice(requestInfo)
+	products, err := httpContr.filter.FilterByBestPrice(ctx, requestInfo)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
-		return cont.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
+		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	cont.Request().Header.Set("Cache-Control", "public,max-age=43200")
+	ctx.Request().Header.Set("Cache-Control", "public,max-age=43200")
 
-	return cont.JSON(http.StatusOK, products)
+	return ctx.JSON(http.StatusOK, products)
 }
 
 // filterByExactPrice defines the logic of the handling the filter-by-set-price requests.
-func (httpContr *HttpController) filterByExactPrice(cont echo.Context) error {
+func (httpContr *HttpController) filterByExactPrice(ctx echo.Context) error {
 	const filterType = "exact-price-filter"
 
-	requestInfo, err := httpContr.validProductRequest(cont)
+	requestInfo, err := httpContr.validProductRequest(ctx)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
-		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
+		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	exactPrice, _ := strconv.Atoi(cont.QueryParam("price"))
+	exactPrice, _ := strconv.Atoi(ctx.QueryParam("price"))
 
 	if exactPrice <= 0 {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrRequestInfo))
-		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
+		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	products, err := httpContr.filter.FilterByExactPrice(requestInfo, exactPrice)
+	products, err := httpContr.filter.FilterByExactPrice(ctx, requestInfo, exactPrice)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
-		return cont.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
+		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	cont.Request().Header.Set("Cache-Control", "public,max-age=43200")
+	ctx.Request().Header.Set("Cache-Control", "public,max-age=43200")
 
-	return cont.JSON(http.StatusOK, products)
+	return ctx.JSON(http.StatusOK, products)
 }
 
 // filterByMarkets defines the logic of the handling the filter-by-markets requests.
-func (httpContr *HttpController) filterByMarkets(cont echo.Context) error {
+func (httpContr *HttpController) filterByMarkets(ctx echo.Context) error {
 	const filterType = "markets-filter"
 
-	requestInfo, err := httpContr.validProductRequest(cont)
+	requestInfo, err := httpContr.validProductRequest(ctx)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
-		return cont.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
+		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	products, err := httpContr.filter.FilterByMarkets(requestInfo)
+	products, err := httpContr.filter.FilterByMarkets(ctx, requestInfo)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrServerHandling))
-		return cont.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
+		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	cont.Request().Header.Set("Cache-Control", "public,max-age=43200")
+	ctx.Request().Header.Set("Cache-Control", "public,max-age=43200")
 
-	return cont.JSON(http.StatusOK, products)
+	return ctx.JSON(http.StatusOK, products)
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 )
 
@@ -24,12 +26,22 @@ func NewMarketsApi(log *slog.Logger) MarketsApi {
 	}
 }
 
+func IsConnectionClosed(ctx echo.Context) bool {
+	select {
+	case <-ctx.Request().Context().Done():
+		return true
+
+	default:
+		return false
+	}
+}
+
 // GetProducts defines getting the products from the needed markets, that set in ProductRequest DTO.
-func (api MarketsApi) GetProducts(product entities.ProductRequest) ([]entities.Product, error) {
+func (api MarketsApi) GetProducts(ctx echo.Context, product entities.ProductRequest) ([]entities.Product, error) {
 	const serviceType = "api.service"
 	var products = make([]entities.Product, 0, 10000)
 
-	wildProd, err := api.wildb.GetProducts(product)
+	wildProd, err := api.wildb.GetProducts(ctx, product)
 
 	if err != nil {
 		return nil, fmt.Errorf("error of the %v: %v", serviceType, err)
@@ -40,11 +52,11 @@ func (api MarketsApi) GetProducts(product entities.ProductRequest) ([]entities.P
 }
 
 // GetProductsByPriceRange defines getting the products from the needed markets.
-func (api MarketsApi) GetProductsByPriceRange(product entities.ProductRequest, priceDown, priceUp int) ([]entities.Product, error) {
+func (api MarketsApi) GetProductsByPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown, priceUp int) ([]entities.Product, error) {
 	const serviceType = "api.service"
 	var products = make([]entities.Product, 0, 10000)
 
-	wildProd, err := api.wildb.GetProductsByPriceRange(product, priceDown, priceUp)
+	wildProd, err := api.wildb.GetProductsByPriceRange(ctx, product, priceDown, priceUp)
 
 	if err != nil {
 		return nil, fmt.Errorf("error of the %v: %v", serviceType, err)
@@ -56,11 +68,11 @@ func (api MarketsApi) GetProductsByPriceRange(product entities.ProductRequest, p
 
 // GetProductsByExactPrice defines getting the products from the needed markets
 // that have the price in range [exactPrice, exactPrice + 10% off exactPrice].
-func (api MarketsApi) GetProductsByExactPrice(product entities.ProductRequest, exactPrice int) ([]entities.Product, error) {
+func (api MarketsApi) GetProductsByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) ([]entities.Product, error) {
 	const serviceType = "api.service"
 	var products = make([]entities.Product, 0, 10000)
 
-	wildProd, err := api.wildb.GetProductsByExactPrice(product, exactPrice)
+	wildProd, err := api.wildb.GetProductsByExactPrice(ctx, product, exactPrice)
 
 	if err != nil {
 		return nil, fmt.Errorf("error of the %v: %v", serviceType, err)
@@ -72,11 +84,11 @@ func (api MarketsApi) GetProductsByExactPrice(product entities.ProductRequest, e
 
 // GetProductsByBestPrice defines getting the products from the needed markets
 // that have the min price.
-func (api MarketsApi) GetProductsByBestPrice(product entities.ProductRequest) ([]entities.Product, error) {
+func (api MarketsApi) GetProductsByBestPrice(ctx echo.Context, product entities.ProductRequest) ([]entities.Product, error) {
 	const serviceType = "api.service"
 	var products = make([]entities.Product, 0, 10000)
 
-	wildProd, err := api.wildb.GetProductsByBestPrice(product)
+	wildProd, err := api.wildb.GetProductsByBestPrice(ctx, product)
 
 	if err != nil {
 		return nil, fmt.Errorf("error of the %v: %v", serviceType, err)

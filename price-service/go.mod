@@ -7,7 +7,6 @@ require (
 	github.com/chromedp/chromedp v0.11.2
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.2
-	go.starlark.net v0.0.0-20241125201518-c05ff208a98f
 )
 
 require (
