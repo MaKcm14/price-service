@@ -91,7 +91,7 @@ func (httpContr *HttpController) validProductRequest(ctx echo.Context) (entities
 		}
 	}
 
-	if len(markets) == 0 {
+	if len(product.Markets) == 0 {
 		return entities.ProductRequest{}, ErrRequestInfo
 	}
 
@@ -123,7 +123,7 @@ func (httpContr *HttpController) filterByPriceUpDown(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	ctx.Request().Header.Set("Cache-Control", "public,max-age=43200")
+	ctx.Response().Header().Add("Cache-Control", "public,max-age=43200")
 
 	return ctx.JSON(http.StatusOK, products)
 }
@@ -146,7 +146,7 @@ func (httpContr *HttpController) filterByBestPrice(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	ctx.Request().Header.Set("Cache-Control", "public,max-age=43200")
+	ctx.Response().Header().Add("Cache-Control", "public,max-age=43200")
 
 	return ctx.JSON(http.StatusOK, products)
 }
@@ -176,7 +176,7 @@ func (httpContr *HttpController) filterByExactPrice(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	ctx.Request().Header.Set("Cache-Control", "public,max-age=43200")
+	ctx.Response().Header().Add("Cache-Control", "public,max-age=43200")
 
 	return ctx.JSON(http.StatusOK, products)
 }
@@ -199,7 +199,7 @@ func (httpContr *HttpController) filterByMarkets(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	ctx.Request().Header.Set("Cache-Control", "public,max-age=43200")
+	ctx.Response().Header().Add("Cache-Control", "public,max-age=43200")
 
 	return ctx.JSON(http.StatusOK, products)
 }

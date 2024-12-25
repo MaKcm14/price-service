@@ -7,8 +7,8 @@ import (
 )
 
 type ApiInteractor interface {
-	GetProducts(ctx echo.Context, product entities.ProductRequest) ([]entities.Product, error)
-	GetProductsByPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown, priceUp int) ([]entities.Product, error)
-	GetProductsByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) ([]entities.Product, error)
-	GetProductsByBestPrice(ctx echo.Context, product entities.ProductRequest) ([]entities.Product, error)
+	GetProducts(ctx echo.Context, product entities.ProductRequest) ([]entities.ProductResponse, error)
+	GetProductsByPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown, priceUp int) ([]entities.ProductResponse, error)
+	GetProductsByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) ([]entities.ProductResponse, error)
+	GetProductsByBestPrice(ctx echo.Context, product entities.ProductRequest) ([]entities.ProductResponse, error)
 }
