@@ -52,10 +52,10 @@ func (httpContr *HttpController) Run() {
 }
 
 func (httpContr *HttpController) configPath() {
-	httpContr.contr.GET("/products/filter/price/price-range/:product_name", httpContr.filterByPriceUpDown)
-	httpContr.contr.GET("/products/filter/price/best-price/:product_name", httpContr.filterByBestPrice)
-	httpContr.contr.GET("/products/filter/price/exact-price/:product_name", httpContr.filterByExactPrice)
-	httpContr.contr.GET("/products/filter/markets/:product_name", httpContr.filterByMarkets)
+	httpContr.contr.GET("/products/filter/price/price-range/:client_type/:product_name", httpContr.filterByPriceUpDown)
+	httpContr.contr.GET("/products/filter/price/best-price/:client_type/:product_name", httpContr.filterByBestPrice)
+	httpContr.contr.GET("/products/filter/price/exact-price/:client_type/:product_name", httpContr.filterByExactPrice)
+	httpContr.contr.GET("/products/filter/markets/:client_type/:product_name", httpContr.filterByMarkets)
 
 	httpContr.contr.HTTPErrorHandler = func(err error, cont echo.Context) {
 		if httpErr, flagCheck := err.(*echo.HTTPError); flagCheck {
@@ -93,6 +93,14 @@ func (httpContr *HttpController) validProductRequest(ctx echo.Context) (entities
 
 	if len(product.Markets) == 0 {
 		return entities.ProductRequest{}, ErrRequestInfo
+	}
+
+	if clientType := ctx.Param("client_type"); clientType == "api" {
+		product.Client = entities.APIClient
+	} else if clientType == "service" {
+		product.Client = entities.UserServiceClient
+	} else {
+		return entities.ProductRequest{}, ErrWrongClientRole
 	}
 
 	return product, nil
@@ -189,7 +197,7 @@ func (httpContr *HttpController) filterByMarkets(ctx echo.Context) error {
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
-		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
+		return ctx.JSON(http.StatusBadRequest, ResponseErr{err.Error()})
 	}
 
 	products, err := httpContr.filter.FilterByMarkets(ctx, requestInfo)

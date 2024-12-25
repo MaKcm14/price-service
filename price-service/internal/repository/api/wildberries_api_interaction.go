@@ -14,6 +14,7 @@ import (
 
 	"github.com/anaskhan96/soup"
 	"github.com/chromedp/chromedp"
+	"github.com/chromedp/chromedp/kb"
 
 	"github.com/labstack/echo/v4"
 
@@ -49,9 +50,10 @@ func NewWildberriesAPI(log *slog.Logger) WildberriesAPI {
 }
 
 // getHtmlPage gets the raw html using the filters and the main url's template.
-func (api WildberriesAPI) getHtmlPage(url string) (string, error) {
+func (api WildberriesAPI) getHtmlPage(url string, request entities.ProductRequest) (string, error) {
 	const serviceType = "wildberries.service"
 	var html string
+	var err error
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag("headless", false),
@@ -62,11 +64,29 @@ func (api WildberriesAPI) getHtmlPage(url string) (string, error) {
 	ctx, cancel = chromedp.NewContext(ctx)
 	defer cancel()
 
-	_, err := chromedp.RunResponse(ctx,
-		chromedp.Navigate(url),
-		chromedp.Sleep(500*time.Millisecond),
-		chromedp.InnerHTML("[class='product-card-list']", &html),
-	)
+	if request.Client == entities.UserServiceClient {
+		_, err = chromedp.RunResponse(ctx,
+			chromedp.Navigate(url),
+			chromedp.InnerHTML("[class='product-card-list']", &html),
+		)
+
+	} else if request.Client == entities.APIClient {
+		actions := make([]chromedp.Action, 0, 15)
+
+		actions = append(actions, chromedp.Navigate(url),
+			chromedp.Sleep(2000*time.Millisecond),
+		)
+
+		for i := 0; i != 6; i++ {
+			actions = append(actions,
+				chromedp.Sleep(2000*time.Millisecond),
+				chromedp.KeyEvent(kb.End),
+			)
+		}
+		actions = append(actions, chromedp.InnerHTML("[class='product-card-list']", &html))
+
+		_, err = chromedp.RunResponse(ctx, actions...)
+	}
 
 	if err != nil {
 		api.logger.Error(fmt.Sprintf("error of the %s: %v: %v", serviceType, ErrChromeDriver, err))
@@ -212,13 +232,22 @@ func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.Product
 	prodsLink := fmt.Sprintf("https://www.wildberries.ru/catalog/0/search.aspx?%s",
 		api.getOpenApiPath(product, filters))
 
-	html, err := api.getHtmlPage(prodsLink)
+	///DEBUG: BENCHMARK START
+	var timeDur = time.Now()
+	html, err := api.getHtmlPage(prodsLink, product)
+
+	fmt.Println("getHtmlPage time:", time.Since(timeDur))
+	///TODO: delete this
 
 	if err != nil {
 		return entities.ProductResponse{}, err
 	}
 
 	imageLinks := api.getImageLinks(html)
+
+	///DEBUG:
+	fmt.Println(len(respProd), len(imageLinks))
+	///TODO: delete
 
 	for i, j := 0, 0; i != int(math.Min(float64(len(respProd)), float64(len(imageLinks)))); i++ {
 		var imageLink string

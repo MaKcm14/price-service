@@ -5,6 +5,7 @@ type ProductRequest struct {
 	ProductName string
 	Sample      int
 	Markets     []Market
+	Client      ClientType
 }
 
 type ProductResponse struct {
