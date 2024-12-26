@@ -4,10 +4,11 @@ package entities
 type ProductRequest struct {
 	ProductName string
 	Sample      int
+	Amount      string
 	Markets     []Market
-	Client      ClientType
 }
 
+// ProductResponse defines the response data.
 type ProductResponse struct {
 	Products         []Product `json:"products"`
 	ParentSampleLink string    `json:"main_products_sample"`
@@ -15,7 +16,7 @@ type ProductResponse struct {
 
 func NewProductRequest() ProductRequest {
 	return ProductRequest{
-		Markets: make([]Market, 0, 10),
+		Markets: make([]Market, 0, 15),
 	}
 }
 

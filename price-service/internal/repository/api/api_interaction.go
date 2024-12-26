@@ -22,7 +22,7 @@ type MarketsApi struct {
 func NewMarketsApi(log *slog.Logger) MarketsApi {
 	return MarketsApi{
 		logger: log,
-		wildb:  NewWildberriesAPI(log),
+		wildb:  NewWildberriesAPI(log, 1),
 	}
 }
 

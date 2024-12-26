@@ -39,13 +39,15 @@ type (
 
 	WildberriesAPI struct {
 		converter urlConverter
+		loadCoeff time.Duration
 		logger    *slog.Logger
 	}
 )
 
-func NewWildberriesAPI(log *slog.Logger) WildberriesAPI {
+func NewWildberriesAPI(log *slog.Logger, loadCoeff int) WildberriesAPI {
 	return WildberriesAPI{
-		logger: log,
+		logger:    log,
+		loadCoeff: time.Duration(loadCoeff),
 	}
 }
 
@@ -64,28 +66,25 @@ func (api WildberriesAPI) getHtmlPage(url string, request entities.ProductReques
 	ctx, cancel = chromedp.NewContext(ctx)
 	defer cancel()
 
-	if request.Client == entities.UserServiceClient {
+	if request.Amount == "min" {
 		_, err = chromedp.RunResponse(ctx,
 			chromedp.Navigate(url),
 			chromedp.InnerHTML("[class='product-card-list']", &html),
 		)
-
-	} else if request.Client == entities.APIClient {
-		actions := make([]chromedp.Action, 0, 15)
-
-		actions = append(actions, chromedp.Navigate(url),
-			chromedp.Sleep(2000*time.Millisecond),
+	} else if request.Amount == "max" {
+		_, err = chromedp.RunResponse(ctx,
+			chromedp.Navigate(url),
+			chromedp.Sleep(3000*api.loadCoeff*time.Millisecond),
+			chromedp.KeyEvent(kb.End),
+			chromedp.Sleep(1000*api.loadCoeff*time.Millisecond),
+			chromedp.KeyEvent(kb.End),
+			chromedp.Sleep(1000*api.loadCoeff*time.Millisecond),
+			chromedp.KeyEvent(kb.End),
+			chromedp.Sleep(1000*api.loadCoeff*time.Millisecond),
+			chromedp.KeyEvent(kb.End),
+			chromedp.Sleep(4000*api.loadCoeff*time.Millisecond),
+			chromedp.InnerHTML("[class='product-card-list']", &html),
 		)
-
-		for i := 0; i != 6; i++ {
-			actions = append(actions,
-				chromedp.Sleep(2000*time.Millisecond),
-				chromedp.KeyEvent(kb.End),
-			)
-		}
-		actions = append(actions, chromedp.InnerHTML("[class='product-card-list']", &html))
-
-		_, err = chromedp.RunResponse(ctx, actions...)
 	}
 
 	if err != nil {
@@ -232,22 +231,13 @@ func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.Product
 	prodsLink := fmt.Sprintf("https://www.wildberries.ru/catalog/0/search.aspx?%s",
 		api.getOpenApiPath(product, filters))
 
-	///DEBUG: BENCHMARK START
-	var timeDur = time.Now()
 	html, err := api.getHtmlPage(prodsLink, product)
-
-	fmt.Println("getHtmlPage time:", time.Since(timeDur))
-	///TODO: delete this
 
 	if err != nil {
 		return entities.ProductResponse{}, err
 	}
 
 	imageLinks := api.getImageLinks(html)
-
-	///DEBUG:
-	fmt.Println(len(respProd), len(imageLinks))
-	///TODO: delete
 
 	for i, j := 0, 0; i != int(math.Min(float64(len(respProd)), float64(len(imageLinks)))); i++ {
 		var imageLink string

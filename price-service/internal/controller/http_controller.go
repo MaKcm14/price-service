@@ -52,10 +52,10 @@ func (httpContr *HttpController) Run() {
 }
 
 func (httpContr *HttpController) configPath() {
-	httpContr.contr.GET("/products/filter/price/price-range/:client_type/:product_name", httpContr.filterByPriceUpDown)
-	httpContr.contr.GET("/products/filter/price/best-price/:client_type/:product_name", httpContr.filterByBestPrice)
-	httpContr.contr.GET("/products/filter/price/exact-price/:client_type/:product_name", httpContr.filterByExactPrice)
-	httpContr.contr.GET("/products/filter/markets/:client_type/:product_name", httpContr.filterByMarkets)
+	httpContr.contr.GET("/products/filter/price/price-range", httpContr.filterByPriceUpDown)
+	httpContr.contr.GET("/products/filter/price/best-price", httpContr.filterByBestPrice)
+	httpContr.contr.GET("/products/filter/price/exact-price", httpContr.filterByExactPrice)
+	httpContr.contr.GET("/products/filter/markets", httpContr.filterByMarkets)
 
 	httpContr.contr.HTTPErrorHandler = func(err error, cont echo.Context) {
 		if httpErr, flagCheck := err.(*echo.HTTPError); flagCheck {
@@ -70,7 +70,7 @@ func (httpContr *HttpController) configPath() {
 func (httpContr *HttpController) validProductRequest(ctx echo.Context) (entities.ProductRequest, error) {
 	product := entities.NewProductRequest()
 
-	product.ProductName = ctx.Param("product_name")
+	product.ProductName = ctx.QueryParam("query")
 
 	sample, _ := strconv.Atoi(ctx.QueryParam("sample"))
 
@@ -90,18 +90,16 @@ func (httpContr *HttpController) validProductRequest(ctx echo.Context) (entities
 			product.Markets = append(product.Markets, entities.MegaMarket)
 		}
 	}
+	amt := ctx.QueryParam("amount")
 
 	if len(product.Markets) == 0 {
 		return entities.ProductRequest{}, ErrRequestInfo
 	}
 
-	if clientType := ctx.Param("client_type"); clientType == "api" {
-		product.Client = entities.APIClient
-	} else if clientType == "service" {
-		product.Client = entities.UserServiceClient
-	} else {
-		return entities.ProductRequest{}, ErrWrongClientRole
+	if amt != "max" && amt != "min" {
+		amt = "min"
 	}
+	product.Amount = amt
 
 	return product, nil
 }
