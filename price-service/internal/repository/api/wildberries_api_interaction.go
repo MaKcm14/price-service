@@ -239,6 +239,10 @@ func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.Product
 
 	imageLinks := api.getImageLinks(html)
 
+	//DEBUG:
+	fmt.Println(len(respProd), len(imageLinks))
+	///TODO: delete this
+
 	for i, j := 0, 0; i != int(math.Min(float64(len(respProd)), float64(len(imageLinks)))); i++ {
 		var imageLink string
 
@@ -277,11 +281,11 @@ func (api WildberriesAPI) GetProductsByPriceRange(ctx echo.Context, product enti
 // GetProductsByExactPrice gets the products with filter by price
 // in range [exactPrice, exactPrice + 10% off exactPrice].
 func (api WildberriesAPI) GetProductsByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) (entities.ProductResponse, error) {
-	return api.getProducts(ctx, product, "sort", "priceDown",
+	return api.getProducts(ctx, product, "sort", "popular",
 		"priceU", fmt.Sprintf("%v00;%v00", exactPrice, int(float32(exactPrice)*1.1)))
 }
 
 // GetProductsByBestPrice gets the products with filter by min price.
 func (api WildberriesAPI) GetProductsByBestPrice(ctx echo.Context, product entities.ProductRequest) (entities.ProductResponse, error) {
-	return api.getProducts(ctx, product, "sort", "priceDown")
+	return api.getProducts(ctx, product, "sort", "priceup")
 }

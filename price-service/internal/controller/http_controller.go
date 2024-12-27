@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -67,15 +68,37 @@ func (httpContr *HttpController) configPath() {
 	}
 }
 
+func (httpContr *HttpController) isDataSafe(data string) bool {
+	data = strings.ToLower(data)
+
+	for _, elem := range data {
+		if string(elem) == "=" {
+			return false
+		}
+	}
+
+	if strings.Contains(data, "drop ") || strings.Contains(data, "union ") || strings.Contains(data, "--") {
+		return false
+	}
+
+	return true
+}
+
 func (httpContr *HttpController) validProductRequest(ctx echo.Context) (entities.ProductRequest, error) {
 	product := entities.NewProductRequest()
 
-	product.ProductName = ctx.QueryParam("query")
+	if query := ctx.QueryParam("query"); httpContr.isDataSafe(query) {
+		product.ProductName, _ = url.QueryUnescape(query)
+	} else {
+		return entities.ProductRequest{}, ErrRequestInfo
+	}
 
-	sample, _ := strconv.Atoi(ctx.QueryParam("sample"))
+	sample, err := strconv.Atoi(ctx.QueryParam("sample"))
 
 	if sample < 0 {
 		return entities.ProductRequest{}, ErrRequestInfo
+	} else if err != nil {
+		return entities.ProductRequest{}, err
 	}
 	product.Sample = sample
 
