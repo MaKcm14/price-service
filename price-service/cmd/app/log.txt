@@ -1,3 +1,5 @@
-time=2024-12-27T14:01:33.306+03:00 level=INFO msg="main application's configuring begun"
-time=2024-12-27T14:01:33.334+03:00 level=INFO msg="the app was STARTED"
-time=2024-12-27T14:01:33.334+03:00 level=INFO msg="configuring and starting the http-server begun"
+time=2024-12-27T17:03:27.108+03:00 level=INFO msg="main application's configuring begun"
+time=2024-12-27T17:03:27.162+03:00 level=INFO msg="the app was STARTED"
+time=2024-12-27T17:03:27.162+03:00 level=INFO msg="configuring and starting the http-server begun"
+time=2024-12-27T17:04:32.500+03:00 level=ERROR msg="error of the wildberries.service: error of the chrome driver's interaction: context canceled"
+time=2024-12-27T17:04:32.647+03:00 level=WARN msg="error of the markets-filter: the server couldn't handle the response"

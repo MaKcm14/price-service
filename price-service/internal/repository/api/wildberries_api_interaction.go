@@ -206,13 +206,13 @@ func (api WildberriesAPI) getResponse(url string) ([]WildberriesProduct, error) 
 
 // getProducts is the main function of getting the products with set filters.
 // The current geo-string defines the Moscow info.
-func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.ProductRequest, filters ...string) (entities.ProductResponse, error) {
+func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.ProductRequest, filters ...string) (entities.ProductSample, error) {
 	const serviceType = "wildberries.service"
 	var products = make([]entities.Product, 0, 750)
 
 	if IsConnectionClosed(ctx) {
 		api.logger.Warn(fmt.Sprintf("error of processing the %v: %v", serviceType, ErrConnectionClosed))
-		return entities.ProductResponse{}, fmt.Errorf("error of processing the %v: %v", serviceType, ErrConnectionClosed)
+		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %v", serviceType, ErrConnectionClosed)
 	}
 
 	respProd, err := api.getResponse(fmt.Sprintf("https://search.wb.ru/exactmatch/ru/common/v9/search?"+
@@ -220,12 +220,12 @@ func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.Product
 		api.getHiddenApiPath(product, filters)))
 
 	if err != nil {
-		return entities.ProductResponse{}, err
+		return entities.ProductSample{}, err
 	}
 
 	if IsConnectionClosed(ctx) {
 		api.logger.Warn(fmt.Sprintf("error of processing the %v: %v", serviceType, ErrConnectionClosed))
-		return entities.ProductResponse{}, fmt.Errorf("error of processing the %v: %v", serviceType, ErrConnectionClosed)
+		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %v", serviceType, ErrConnectionClosed)
 	}
 
 	prodsLink := fmt.Sprintf("https://www.wildberries.ru/catalog/0/search.aspx?%s",
@@ -234,14 +234,10 @@ func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.Product
 	html, err := api.getHtmlPage(prodsLink, product)
 
 	if err != nil {
-		return entities.ProductResponse{}, err
+		return entities.ProductSample{}, err
 	}
 
 	imageLinks := api.getImageLinks(html)
-
-	//DEBUG:
-	fmt.Println(len(respProd), len(imageLinks))
-	///TODO: delete this
 
 	for i, j := 0, 0; i != int(math.Min(float64(len(respProd)), float64(len(imageLinks)))); i++ {
 		var imageLink string
@@ -264,28 +260,28 @@ func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.Product
 		})
 	}
 
-	return entities.NewProductResponse(products, prodsLink), nil
+	return entities.NewProductSample(products, prodsLink, entities.Wildberries), nil
 }
 
 // GetProducts gets the products without any filters.
-func (api WildberriesAPI) GetProducts(ctx echo.Context, product entities.ProductRequest) (entities.ProductResponse, error) {
+func (api WildberriesAPI) GetProducts(ctx echo.Context, product entities.ProductRequest) (entities.ProductSample, error) {
 	return api.getProducts(ctx, product, "sort", "popular")
 }
 
 // GetProductsByPriceRange gets the products with filter by price range.
-func (api WildberriesAPI) GetProductsByPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown, priceUp int) (entities.ProductResponse, error) {
+func (api WildberriesAPI) GetProductsByPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error) {
 	return api.getProducts(ctx, product, "sort", "popular",
 		"priceU", fmt.Sprintf("%v00;%v00", priceDown, priceUp))
 }
 
 // GetProductsByExactPrice gets the products with filter by price
 // in range [exactPrice, exactPrice + 10% off exactPrice].
-func (api WildberriesAPI) GetProductsByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) (entities.ProductResponse, error) {
-	return api.getProducts(ctx, product, "sort", "popular",
+func (api WildberriesAPI) GetProductsByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) (entities.ProductSample, error) {
+	return api.getProducts(ctx, product, "sort", "priceup",
 		"priceU", fmt.Sprintf("%v00;%v00", exactPrice, int(float32(exactPrice)*1.1)))
 }
 
 // GetProductsByBestPrice gets the products with filter by min price.
-func (api WildberriesAPI) GetProductsByBestPrice(ctx echo.Context, product entities.ProductRequest) (entities.ProductResponse, error) {
+func (api WildberriesAPI) GetProductsByBestPrice(ctx echo.Context, product entities.ProductRequest) (entities.ProductSample, error) {
 	return api.getProducts(ctx, product, "sort", "priceup")
 }

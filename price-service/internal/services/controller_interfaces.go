@@ -8,13 +8,13 @@ import (
 
 type (
 	MarketFilterAdapter interface {
-		FilterByMarkets(ctx echo.Context, product entities.ProductRequest) ([]entities.ProductResponse, error)
+		FilterByMarkets(ctx echo.Context, product entities.ProductRequest) ([]entities.ProductSample, error)
 	}
 
 	PriceFilterAdapter interface {
-		FilterByPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown int, priceUp int) ([]entities.ProductResponse, error)
-		FilterByBestPrice(ctx echo.Context, product entities.ProductRequest) ([]entities.ProductResponse, error)
-		FilterByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) ([]entities.ProductResponse, error)
+		FilterByPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown int, priceUp int) ([]entities.ProductSample, error)
+		FilterByBestPrice(ctx echo.Context, product entities.ProductRequest) ([]entities.ProductSample, error)
+		FilterByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) ([]entities.ProductSample, error)
 	}
 
 	Filter interface {

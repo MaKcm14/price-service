@@ -13,3 +13,28 @@ type Product struct {
 	Market   string          `json:"market"`
 	Supplier string          `json:"supplier"`
 }
+
+// ProductSample defines the sample of the products from the market.
+type ProductSample struct {
+	Products         []Product `json:"products"`
+	ParentSampleLink string    `json:"main_products_sample"`
+	Market           string
+}
+
+func NewProductSample(products []Product, sampleLink string, sampleMarket Market) ProductSample {
+	var market string
+
+	if sampleMarket == Wildberries {
+		market = "Wildberries"
+	} else if sampleMarket == Ozon {
+		market = "Ozon"
+	} else if sampleMarket == MegaMarket {
+		market = "Megamarket"
+	}
+
+	return ProductSample{
+		Products:         products,
+		ParentSampleLink: sampleLink,
+		Market:           market,
+	}
+}
