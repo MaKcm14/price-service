@@ -1,23 +1,23 @@
 package entities
 
-type ProductMetaData struct {
+type ProductLink struct {
 	URL       string `json:"url"`
 	ImageLink string `json:"image_link"`
 }
 
 type Product struct {
-	Name     string          `json:"name"`
-	Brand    string          `json:"brand"`
-	Price    Price           `json:"price"`
-	MetaData ProductMetaData `json:"meta_data"`
-	Supplier string          `json:"supplier"`
+	Name     string      `json:"name"`
+	Brand    string      `json:"brand"`
+	Price    Price       `json:"price"`
+	Links    ProductLink `json:"related_links"`
+	Supplier string      `json:"supplier"`
 }
 
-// ProductSample defines the sample of the products from the market.
+// ProductSample defines the sample of the products from the one market.
 type ProductSample struct {
-	Products         []Product `json:"products"`
-	ParentSampleLink string    `json:"main_products_sample"`
-	Market           string    `json:"market"`
+	Products   []Product `json:"products"`
+	SampleLink string    `json:"main_products_sample"`
+	Market     string    `json:"market"`
 }
 
 func NewProductSample(products []Product, sampleLink string, sampleMarket Market) ProductSample {
@@ -32,8 +32,8 @@ func NewProductSample(products []Product, sampleLink string, sampleMarket Market
 	}
 
 	return ProductSample{
-		Products:         products,
-		ParentSampleLink: sampleLink,
-		Market:           market,
+		Products:   products,
+		SampleLink: sampleLink,
+		Market:     market,
 	}
 }

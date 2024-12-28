@@ -47,10 +47,10 @@ func (httpContr HttpController) Run() {
 }
 
 func (httpContr *HttpController) configPath() {
-	httpContr.contr.GET("/products/filter/price/price-range", httpContr.filterByPriceUpDown)
-	httpContr.contr.GET("/products/filter/price/best-price", httpContr.filterByBestPrice)
-	httpContr.contr.GET("/products/filter/price/exact-price", httpContr.filterByExactPrice)
-	httpContr.contr.GET("/products/filter/markets", httpContr.filterByMarkets)
+	httpContr.contr.GET("/products/filter/price/price-range", httpContr.handlePriceRangeRequest)
+	httpContr.contr.GET("/products/filter/price/best-price", httpContr.handleBestPriceRequest)
+	httpContr.contr.GET("/products/filter/price/exact-price", httpContr.handleExactPriceRequest)
+	httpContr.contr.GET("/products/filter/markets", httpContr.handleMarketsRequest)
 
 	httpContr.contr.HTTPErrorHandler = func(err error, cont echo.Context) {
 		if httpErr, flagCheck := err.(*echo.HTTPError); flagCheck {
@@ -63,7 +63,7 @@ func (httpContr *HttpController) configPath() {
 }
 
 // filterByPriceUpDown defines the logic of the handling the filter-by-price-down-up requests.
-func (httpContr *HttpController) filterByPriceUpDown(ctx echo.Context) error {
+func (httpContr *HttpController) handlePriceRangeRequest(ctx echo.Context) error {
 	const filterType = "price-range-filter"
 
 	requestInfo, err := httpContr.valid.validProductRequest(ctx,
@@ -98,7 +98,7 @@ func (httpContr *HttpController) filterByPriceUpDown(ctx echo.Context) error {
 }
 
 // filterByBestPrice defines the logic of the handling the filter-by-minimal-price requests.
-func (httpContr *HttpController) filterByBestPrice(ctx echo.Context) error {
+func (httpContr *HttpController) handleBestPriceRequest(ctx echo.Context) error {
 	const filterType = "best-price-filter"
 
 	requestInfo, err := httpContr.valid.validProductRequest(ctx,
@@ -126,7 +126,7 @@ func (httpContr *HttpController) filterByBestPrice(ctx echo.Context) error {
 }
 
 // filterByExactPrice defines the logic of the handling the filter-by-set-price requests.
-func (httpContr *HttpController) filterByExactPrice(ctx echo.Context) error {
+func (httpContr *HttpController) handleExactPriceRequest(ctx echo.Context) error {
 	const filterType = "exact-price-filter"
 
 	requestInfo, err := httpContr.valid.validProductRequest(ctx,
@@ -161,7 +161,7 @@ func (httpContr *HttpController) filterByExactPrice(ctx echo.Context) error {
 }
 
 // filterByMarkets defines the logic of the handling the filter-by-markets requests.
-func (httpContr *HttpController) filterByMarkets(ctx echo.Context) error {
+func (httpContr *HttpController) handleMarketsRequest(ctx echo.Context) error {
 	const filterType = "markets-filter"
 
 	requestInfo, err := httpContr.valid.validProductRequest(ctx,

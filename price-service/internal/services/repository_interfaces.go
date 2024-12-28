@@ -6,9 +6,19 @@ import (
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 )
 
-type ApiInteractor interface {
-	GetProducts(ctx echo.Context, product entities.ProductRequest) ([]entities.ProductSample, error)
-	GetProductsByPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown, priceUp int) ([]entities.ProductSample, error)
-	GetProductsByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) ([]entities.ProductSample, error)
-	GetProductsByBestPrice(ctx echo.Context, product entities.ProductRequest) ([]entities.ProductSample, error)
-}
+type (
+	MarketsSifter interface {
+		GetProducts(ctx echo.Context, product entities.ProductRequest) (entities.ProductSample, error)
+	}
+
+	PriceSifter interface {
+		GetProductsWithPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error)
+		GetProductsWithExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) (entities.ProductSample, error)
+		GetProductsWithBestPrice(ctx echo.Context, product entities.ProductRequest) (entities.ProductSample, error)
+	}
+
+	ApiInteractor interface {
+		PriceSifter
+		MarketsSifter
+	}
+)

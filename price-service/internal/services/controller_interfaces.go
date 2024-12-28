@@ -7,7 +7,7 @@ import (
 )
 
 type (
-	MarketFilterAdapter interface {
+	MarketsFilterAdapter interface {
 		FilterByMarkets(ctx echo.Context, product entities.ProductRequest) ([]entities.ProductSample, error)
 	}
 
@@ -18,7 +18,7 @@ type (
 	}
 
 	Filter interface {
-		MarketFilterAdapter
+		MarketsFilterAdapter
 		PriceFilterAdapter
 	}
 )

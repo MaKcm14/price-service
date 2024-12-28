@@ -252,7 +252,7 @@ func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.Product
 			Brand:    respProd[i].Brand,
 			Price:    entities.NewPrice(respProd[i].Sizes[0].Price.Basic/100, respProd[i].Sizes[0].Price.Total/100),
 			Supplier: respProd[i].Supplier,
-			MetaData: entities.ProductMetaData{
+			Links: entities.ProductLink{
 				URL:       fmt.Sprintf("https://www.wildberries.ru/catalog/%v/detail.aspx", respProd[i].ID),
 				ImageLink: imageLink,
 			},
@@ -268,19 +268,19 @@ func (api WildberriesAPI) GetProducts(ctx echo.Context, product entities.Product
 }
 
 // GetProductsByPriceRange gets the products with filter by price range.
-func (api WildberriesAPI) GetProductsByPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error) {
+func (api WildberriesAPI) GetProductsWithPriceRange(ctx echo.Context, product entities.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error) {
 	return api.getProducts(ctx, product, "sort", "popular",
 		"priceU", fmt.Sprintf("%v00;%v00", priceDown, priceUp))
 }
 
 // GetProductsByExactPrice gets the products with filter by price
 // in range [exactPrice, exactPrice + 10% off exactPrice].
-func (api WildberriesAPI) GetProductsByExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) (entities.ProductSample, error) {
+func (api WildberriesAPI) GetProductsWithExactPrice(ctx echo.Context, product entities.ProductRequest, exactPrice int) (entities.ProductSample, error) {
 	return api.getProducts(ctx, product, "sort", "priceup",
 		"priceU", fmt.Sprintf("%v00;%v00", exactPrice, int(float32(exactPrice)*1.1)))
 }
 
 // GetProductsByBestPrice gets the products with filter by min price.
-func (api WildberriesAPI) GetProductsByBestPrice(ctx echo.Context, product entities.ProductRequest) (entities.ProductSample, error) {
+func (api WildberriesAPI) GetProductsWithBestPrice(ctx echo.Context, product entities.ProductRequest) (entities.ProductSample, error) {
 	return api.getProducts(ctx, product, "sort", "priceup")
 }
