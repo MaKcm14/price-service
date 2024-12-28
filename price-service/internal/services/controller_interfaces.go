@@ -1,20 +1,24 @@
 package services
 
-import "github.com/MaKcm14/best-price-service/price-service/internal/entities"
+import (
+	"github.com/labstack/echo/v4"
+
+	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
+)
 
 type (
-	MarketFilterAdapter interface {
-		FilterByMarkets(product entities.ProductRequest) ([]entities.Product, error)
+	MarketsFilterAdapter interface {
+		FilterByMarkets(ctx echo.Context, request entities.ProductRequest) ([]entities.ProductSample, error)
 	}
 
 	PriceFilterAdapter interface {
-		FilterByPriceRange(product entities.ProductRequest, priceDown int, priceUp int) ([]entities.Product, error)
-		FilterByBestPrice(product entities.ProductRequest) ([]entities.Product, error)
-		FilterByExactPrice(product entities.ProductRequest, exactPrice int) ([]entities.Product, error)
+		FilterByPriceRange(ctx echo.Context, request entities.ProductRequest, priceDown int, priceUp int) ([]entities.ProductSample, error)
+		FilterByBestPrice(ctx echo.Context, request entities.ProductRequest) ([]entities.ProductSample, error)
+		FilterByExactPrice(ctx echo.Context, request entities.ProductRequest, exactPrice int) ([]entities.ProductSample, error)
 	}
 
 	Filter interface {
-		MarketFilterAdapter
+		MarketsFilterAdapter
 		PriceFilterAdapter
 	}
 )

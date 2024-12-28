@@ -8,9 +8,12 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type ConfigOpts func(*Config, *slog.Logger) error
+
 // Config sets the application's configurations.
 type Config struct {
-	DSN string
+	DSN    string
+	Socket string
 }
 
 // configEnv gets ENV var. It returns the error if var is unset or unexisting.
@@ -26,7 +29,19 @@ func configEnv(key string, log *slog.Logger) (string, error) {
 	return env, nil
 }
 
-func NewConfig(log *slog.Logger) (Config, error) {
+// Socket configs the Socket ENV.
+func Socket(config *Config, log *slog.Logger) error {
+	socket, err := configEnv("SOCKET", log)
+
+	if err != nil {
+		return err
+	}
+	config.Socket = socket
+
+	return nil
+}
+
+func NewConfig(log *slog.Logger, opts ...ConfigOpts) (Config, error) {
 	config := Config{}
 	err := godotenv.Load("../../.env")
 
@@ -36,10 +51,10 @@ func NewConfig(log *slog.Logger) (Config, error) {
 		return Config{}, envErr
 	}
 
-	config.DSN, err = configEnv("DSN", log)
-
-	if err != nil {
-		return Config{}, err
+	for _, opt := range opts {
+		if err := opt(&config, log); err != nil {
+			return Config{}, err
+		}
 	}
 
 	return config, nil

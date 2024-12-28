@@ -6,4 +6,5 @@ const (
 	Ozon Market = iota
 	Wildberries
 	MegaMarket
+	NotExists
 )

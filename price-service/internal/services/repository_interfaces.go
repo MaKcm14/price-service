@@ -1,10 +1,24 @@
 package services
 
-import "github.com/MaKcm14/best-price-service/price-service/internal/entities"
+import (
+	"github.com/labstack/echo/v4"
 
-type ApiInteractor interface {
-	GetProducts(product entities.ProductRequest) ([]entities.Product, error)
-	GetProductsByPriceRange(product entities.ProductRequest, priceDown, priceUp int) ([]entities.Product, error)
-	GetProductsByExactPrice(product entities.ProductRequest, exactPrice int) ([]entities.Product, error)
-	GetProductsByBestPrice(product entities.ProductRequest) ([]entities.Product, error)
-}
+	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
+)
+
+type (
+	MarketsSifter interface {
+		GetProducts(ctx echo.Context, request entities.ProductRequest) (entities.ProductSample, error)
+	}
+
+	PriceSifter interface {
+		GetProductsWithPriceRange(ctx echo.Context, request entities.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error)
+		GetProductsWithExactPrice(ctx echo.Context, request entities.ProductRequest, exactPrice int) (entities.ProductSample, error)
+		GetProductsWithBestPrice(ctx echo.Context, request entities.ProductRequest) (entities.ProductSample, error)
+	}
+
+	ApiInteractor interface {
+		PriceSifter
+		MarketsSifter
+	}
+)
