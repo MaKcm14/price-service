@@ -36,7 +36,7 @@ func NewApp() App {
 	}
 
 	return App{
-		appContr: controller.NewHttpController(echo.New(), log, services.NewFilter(log), conf.Socket),
+		appContr: controller.NewHttpController(echo.New(), log, services.NewProductsFilter(log), conf.Socket),
 		logger:   log,
 		logFile:  logFile,
 	}

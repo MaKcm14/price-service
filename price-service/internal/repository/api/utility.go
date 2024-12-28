@@ -8,7 +8,8 @@ const (
 	Wildberries string = "Wildberries"
 )
 
-func IsConnectionClosed(ctx echo.Context) bool {
+// isConnectionClosed checks is the connection with the client is still alive.
+func isConnectionClosed(ctx echo.Context) bool {
 	select {
 	case <-ctx.Request().Context().Done():
 		return true

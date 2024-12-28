@@ -2,10 +2,12 @@ package entities
 
 // ProductRequest defines the request data from the client to this service.
 type ProductRequest struct {
-	Query   string
-	Sample  int
-	Amount  string
-	Markets []Market
+	Query       string
+	Sample      int
+	Amount      string
+	Sort        string
+	FlagNoImage bool
+	Markets     []Market
 }
 
 func NewProductRequest() ProductRequest {

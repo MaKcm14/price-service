@@ -90,6 +90,32 @@ func (v validator) validAmount(ctx echo.Context, request *entities.ProductReques
 	return nil
 }
 
+// validSort validates the param "sort" that defines the sort of sample.
+func (v validator) validSort(ctx echo.Context, request *entities.ProductRequest) error {
+	request.Sort = ctx.QueryParam("sort")
+
+	if sort := request.Sort; sort != "popular" && sort != "pricedown" && sort != "priceup" &&
+		sort != "rate" && sort != "newly" {
+		request.Sort = "popular"
+	}
+
+	return nil
+}
+
+// validNoImage validates the param "no-image" that defines the presense the image-links in
+// the response.
+func (v validator) validNoImage(ctx echo.Context, request *entities.ProductRequest) error {
+	flagNoImage := ctx.QueryParam("no-image")
+
+	request.FlagNoImage = true
+
+	if flagNoImage == "0" {
+		request.FlagNoImage = false
+	}
+
+	return nil
+}
+
 // validProductRequest validates the info from the URL-query's params.
 func (v validator) validProductRequest(ctx echo.Context, opts ...queryOpts) (entities.ProductRequest, error) {
 	var request entities.ProductRequest

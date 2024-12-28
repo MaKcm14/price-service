@@ -30,32 +30,32 @@ func NewHttpController(contr *echo.Echo, logger *slog.Logger, filter services.Fi
 }
 
 // Run configures and starts the http-server.
-func (httpContr HttpController) Run() {
-	defer httpContr.logger.Info("the http-server was stopped")
-	defer httpContr.contr.Close()
+func (h HttpController) Run() {
+	defer h.logger.Info("the http-server was stopped")
+	defer h.contr.Close()
 
-	httpContr.logger.Info("configuring and starting the http-server begun")
+	h.logger.Info("configuring and starting the http-server begun")
 
-	httpContr.configPath()
-	err := httpContr.contr.Start(httpContr.socket)
+	h.configPaths()
+	err := h.contr.Start(h.socket)
 
 	if err != nil {
 		serverErr := fmt.Errorf("http-server wasn't started: %v", err)
-		httpContr.logger.Error(serverErr.Error())
+		h.logger.Error(serverErr.Error())
 		panic(serverErr)
 	}
 }
 
-func (httpContr *HttpController) configPath() {
-	httpContr.contr.GET("/products/filter/price/price-range", httpContr.handlePriceRangeRequest)
-	httpContr.contr.GET("/products/filter/price/best-price", httpContr.handleBestPriceRequest)
-	httpContr.contr.GET("/products/filter/price/exact-price", httpContr.handleExactPriceRequest)
-	httpContr.contr.GET("/products/filter/markets", httpContr.handleMarketsRequest)
+func (h *HttpController) configPaths() {
+	h.contr.GET("/products/filter/price/price-range", h.handlePriceRangeRequest)
+	h.contr.GET("/products/filter/price/best-price", h.handleBestPriceRequest)
+	h.contr.GET("/products/filter/price/exact-price", h.handleExactPriceRequest)
+	h.contr.GET("/products/filter/markets", h.handleMarketsRequest)
 
-	httpContr.contr.HTTPErrorHandler = func(err error, cont echo.Context) {
-		if httpErr, flagCheck := err.(*echo.HTTPError); flagCheck {
-			if httpErr.Code == http.StatusNotFound {
-				httpContr.logger.Warn("the wrong request path was got")
+	h.contr.HTTPErrorHandler = func(err error, cont echo.Context) {
+		if err, flagCheck := err.(*echo.HTTPError); flagCheck {
+			if err.Code == http.StatusNotFound {
+				h.logger.Warn("the wrong request path was got")
 				cont.JSON(http.StatusNotFound, ResponseErr{ErrRequestPath.Error()})
 			}
 		}
@@ -63,32 +63,34 @@ func (httpContr *HttpController) configPath() {
 }
 
 // filterByPriceUpDown defines the logic of the handling the filter-by-price-down-up requests.
-func (httpContr *HttpController) handlePriceRangeRequest(ctx echo.Context) error {
+func (h *HttpController) handlePriceRangeRequest(ctx echo.Context) error {
 	const filterType = "price-range-filter"
 
-	requestInfo, err := httpContr.valid.validProductRequest(ctx,
-		httpContr.valid.validQuery,
-		httpContr.valid.validMarkets,
-		httpContr.valid.validAmount,
-		httpContr.valid.validSample,
+	requestInfo, err := h.valid.validProductRequest(ctx,
+		h.valid.validQuery,
+		h.valid.validMarkets,
+		h.valid.validAmount,
+		h.valid.validSample,
+		h.valid.validSort,
+		h.valid.validNoImage,
 	)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 	priceDown, _ := strconv.Atoi(ctx.QueryParam("price_down"))
 	priceUp, _ := strconv.Atoi(ctx.QueryParam("price_up"))
 
 	if priceDown < 0 || priceUp <= 0 || priceUp < priceDown {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrRequestInfo))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrRequestInfo))
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	products, err := httpContr.filter.FilterByPriceRange(ctx, requestInfo, priceDown, priceUp)
+	products, err := h.filter.FilterByPriceRange(ctx, requestInfo, priceDown, priceUp)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
@@ -98,25 +100,26 @@ func (httpContr *HttpController) handlePriceRangeRequest(ctx echo.Context) error
 }
 
 // filterByBestPrice defines the logic of the handling the filter-by-minimal-price requests.
-func (httpContr *HttpController) handleBestPriceRequest(ctx echo.Context) error {
+func (h *HttpController) handleBestPriceRequest(ctx echo.Context) error {
 	const filterType = "best-price-filter"
 
-	requestInfo, err := httpContr.valid.validProductRequest(ctx,
-		httpContr.valid.validQuery,
-		httpContr.valid.validMarkets,
-		httpContr.valid.validAmount,
-		httpContr.valid.validSample,
+	requestInfo, err := h.valid.validProductRequest(ctx,
+		h.valid.validQuery,
+		h.valid.validMarkets,
+		h.valid.validAmount,
+		h.valid.validSample,
+		h.valid.validNoImage,
 	)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	products, err := httpContr.filter.FilterByBestPrice(ctx, requestInfo)
+	products, err := h.filter.FilterByBestPrice(ctx, requestInfo)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
@@ -126,32 +129,34 @@ func (httpContr *HttpController) handleBestPriceRequest(ctx echo.Context) error 
 }
 
 // filterByExactPrice defines the logic of the handling the filter-by-set-price requests.
-func (httpContr *HttpController) handleExactPriceRequest(ctx echo.Context) error {
+func (h *HttpController) handleExactPriceRequest(ctx echo.Context) error {
 	const filterType = "exact-price-filter"
 
-	requestInfo, err := httpContr.valid.validProductRequest(ctx,
-		httpContr.valid.validQuery,
-		httpContr.valid.validMarkets,
-		httpContr.valid.validAmount,
-		httpContr.valid.validSample,
+	requestInfo, err := h.valid.validProductRequest(ctx,
+		h.valid.validQuery,
+		h.valid.validMarkets,
+		h.valid.validAmount,
+		h.valid.validSample,
+		h.valid.validSort,
+		h.valid.validNoImage,
 	)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
 	exactPrice, _ := strconv.Atoi(ctx.QueryParam("price"))
 
 	if exactPrice <= 0 {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrRequestInfo))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrRequestInfo))
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	products, err := httpContr.filter.FilterByExactPrice(ctx, requestInfo, exactPrice)
+	products, err := h.filter.FilterByExactPrice(ctx, requestInfo, exactPrice)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
@@ -161,25 +166,27 @@ func (httpContr *HttpController) handleExactPriceRequest(ctx echo.Context) error
 }
 
 // filterByMarkets defines the logic of the handling the filter-by-markets requests.
-func (httpContr *HttpController) handleMarketsRequest(ctx echo.Context) error {
+func (h *HttpController) handleMarketsRequest(ctx echo.Context) error {
 	const filterType = "markets-filter"
 
-	requestInfo, err := httpContr.valid.validProductRequest(ctx,
-		httpContr.valid.validQuery,
-		httpContr.valid.validMarkets,
-		httpContr.valid.validAmount,
-		httpContr.valid.validSample,
+	requestInfo, err := h.valid.validProductRequest(ctx,
+		h.valid.validQuery,
+		h.valid.validMarkets,
+		h.valid.validAmount,
+		h.valid.validSample,
+		h.valid.validSort,
+		h.valid.validNoImage,
 	)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{err.Error()})
 	}
 
-	products, err := httpContr.filter.FilterByMarkets(ctx, requestInfo)
+	products, err := h.filter.FilterByMarkets(ctx, requestInfo)
 
 	if err != nil {
-		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrServerHandling))
+		h.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrServerHandling))
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
