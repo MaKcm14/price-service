@@ -4,46 +4,40 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 )
 
-type (
-	// HttpController handles the clients requests.
-	HttpController struct {
-		contr  *echo.Echo
-		logger *slog.Logger
-		filter services.Filter
-	}
+// HttpController handles the clients' requests.
+type HttpController struct {
+	contr  *echo.Echo
+	logger *slog.Logger
+	filter services.Filter
+	socket string
+	valid  validator
+}
 
-	ResponseErr struct {
-		Error string `json:"error"`
-	}
-)
-
-func NewHttpController(contr *echo.Echo, logger *slog.Logger, filter services.Filter) *HttpController {
-	return &HttpController{
+func NewHttpController(contr *echo.Echo, logger *slog.Logger, filter services.Filter, socket string) HttpController {
+	return HttpController{
 		contr:  contr,
 		logger: logger,
 		filter: filter,
+		socket: socket,
 	}
 }
 
 // Run configures and starts the http-server.
-func (httpContr *HttpController) Run() {
+func (httpContr HttpController) Run() {
 	defer httpContr.logger.Info("the http-server was stopped")
 	defer httpContr.contr.Close()
 
 	httpContr.logger.Info("configuring and starting the http-server begun")
 
 	httpContr.configPath()
-	err := httpContr.contr.Start("localhost:8080")
+	err := httpContr.contr.Start(httpContr.socket)
 
 	if err != nil {
 		serverErr := fmt.Errorf("http-server wasn't started: %v", err)
@@ -68,70 +62,16 @@ func (httpContr *HttpController) configPath() {
 	}
 }
 
-func (httpContr *HttpController) isDataSafe(data string) bool {
-	data = strings.ToLower(data)
-
-	for _, elem := range data {
-		if string(elem) == "=" {
-			return false
-		}
-	}
-
-	if strings.Contains(data, "drop ") || strings.Contains(data, "union ") || strings.Contains(data, "--") {
-		return false
-	}
-
-	return true
-}
-
-func (httpContr *HttpController) validProductRequest(ctx echo.Context) (entities.ProductRequest, error) {
-	product := entities.NewProductRequest()
-
-	if query := ctx.QueryParam("query"); httpContr.isDataSafe(query) {
-		product.ProductName, _ = url.QueryUnescape(query)
-	} else {
-		return entities.ProductRequest{}, ErrRequestInfo
-	}
-
-	sample, err := strconv.Atoi(ctx.QueryParam("sample"))
-
-	if sample < 0 {
-		return entities.ProductRequest{}, ErrRequestInfo
-	} else if err != nil {
-		return entities.ProductRequest{}, err
-	}
-	product.Sample = sample
-
-	markets := ctx.QueryParam("markets")
-
-	for _, market := range strings.Split(markets, " ") {
-		if market == "wildberries" {
-			product.Markets = append(product.Markets, entities.Wildberries)
-		} else if market == "ozon" {
-			product.Markets = append(product.Markets, entities.Ozon)
-		} else if market == "megamarket" {
-			product.Markets = append(product.Markets, entities.MegaMarket)
-		}
-	}
-	amt := ctx.QueryParam("amount")
-
-	if len(product.Markets) == 0 {
-		return entities.ProductRequest{}, ErrRequestInfo
-	}
-
-	if amt != "max" && amt != "min" {
-		amt = "min"
-	}
-	product.Amount = amt
-
-	return product, nil
-}
-
 // filterByPriceUpDown defines the logic of the handling the filter-by-price-down-up requests.
 func (httpContr *HttpController) filterByPriceUpDown(ctx echo.Context) error {
 	const filterType = "price-range-filter"
 
-	requestInfo, err := httpContr.validProductRequest(ctx)
+	requestInfo, err := httpContr.valid.validProductRequest(ctx,
+		httpContr.valid.validQuery,
+		httpContr.valid.validMarkets,
+		httpContr.valid.validAmount,
+		httpContr.valid.validSample,
+	)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
@@ -140,7 +80,7 @@ func (httpContr *HttpController) filterByPriceUpDown(ctx echo.Context) error {
 	priceDown, _ := strconv.Atoi(ctx.QueryParam("price_down"))
 	priceUp, _ := strconv.Atoi(ctx.QueryParam("price_up"))
 
-	if priceDown < 0 || priceUp < 0 || priceUp < priceDown {
+	if priceDown < 0 || priceUp <= 0 || priceUp < priceDown {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrRequestInfo))
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
@@ -161,7 +101,12 @@ func (httpContr *HttpController) filterByPriceUpDown(ctx echo.Context) error {
 func (httpContr *HttpController) filterByBestPrice(ctx echo.Context) error {
 	const filterType = "best-price-filter"
 
-	requestInfo, err := httpContr.validProductRequest(ctx)
+	requestInfo, err := httpContr.valid.validProductRequest(ctx,
+		httpContr.valid.validQuery,
+		httpContr.valid.validMarkets,
+		httpContr.valid.validAmount,
+		httpContr.valid.validSample,
+	)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
@@ -184,7 +129,12 @@ func (httpContr *HttpController) filterByBestPrice(ctx echo.Context) error {
 func (httpContr *HttpController) filterByExactPrice(ctx echo.Context) error {
 	const filterType = "exact-price-filter"
 
-	requestInfo, err := httpContr.validProductRequest(ctx)
+	requestInfo, err := httpContr.valid.validProductRequest(ctx,
+		httpContr.valid.validQuery,
+		httpContr.valid.validMarkets,
+		httpContr.valid.validAmount,
+		httpContr.valid.validSample,
+	)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
@@ -214,7 +164,12 @@ func (httpContr *HttpController) filterByExactPrice(ctx echo.Context) error {
 func (httpContr *HttpController) filterByMarkets(ctx echo.Context) error {
 	const filterType = "markets-filter"
 
-	requestInfo, err := httpContr.validProductRequest(ctx)
+	requestInfo, err := httpContr.valid.validProductRequest(ctx,
+		httpContr.valid.validQuery,
+		httpContr.valid.validMarkets,
+		httpContr.valid.validAmount,
+		httpContr.valid.validSample,
+	)
 
 	if err != nil {
 		httpContr.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))

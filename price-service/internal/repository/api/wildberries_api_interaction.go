@@ -128,7 +128,7 @@ func (api WildberriesAPI) getOpenApiPath(product entities.ProductRequest, filter
 		path += "&priceU=" + priceRange
 	}
 
-	path += "&search=" + strings.Join(strings.Split(product.ProductName, " "), "+")
+	path += "&search=" + strings.Join(strings.Split(product.Query, " "), "+")
 
 	return path
 }
@@ -145,7 +145,7 @@ func (api WildberriesAPI) getHiddenApiPath(product entities.ProductRequest, filt
 		path += "&priceU=" + priceRange
 	}
 
-	path += "&query=" + url.QueryEscape(product.ProductName)
+	path += "&query=" + url.QueryEscape(product.Query)
 
 	path += "&resultset=catalog&sort=" + filtersURL["sort"]
 	path += "&spp=30&suppressSpellcheck=false"
@@ -251,7 +251,6 @@ func (api WildberriesAPI) getProducts(ctx echo.Context, product entities.Product
 			Name:     respProd[i].Name,
 			Brand:    respProd[i].Brand,
 			Price:    entities.NewPrice(respProd[i].Sizes[0].Price.Basic/100, respProd[i].Sizes[0].Price.Total/100),
-			Market:   Wildberries,
 			Supplier: respProd[i].Supplier,
 			MetaData: entities.ProductMetaData{
 				URL:       fmt.Sprintf("https://www.wildberries.ru/catalog/%v/detail.aspx", respProd[i].ID),

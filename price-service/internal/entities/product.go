@@ -10,7 +10,6 @@ type Product struct {
 	Brand    string          `json:"brand"`
 	Price    Price           `json:"price"`
 	MetaData ProductMetaData `json:"meta_data"`
-	Market   string          `json:"market"`
 	Supplier string          `json:"supplier"`
 }
 
@@ -18,7 +17,7 @@ type Product struct {
 type ProductSample struct {
 	Products         []Product `json:"products"`
 	ParentSampleLink string    `json:"main_products_sample"`
-	Market           string
+	Market           string    `json:"market"`
 }
 
 func NewProductSample(products []Product, sampleLink string, sampleMarket Market) ProductSample {
