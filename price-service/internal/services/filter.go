@@ -23,11 +23,11 @@ func NewProductsFilter(log *slog.Logger, chrome Driver) ProductsFilter {
 	}
 }
 
-// TODO: check this method: it doesn't observer the CA.
+// TODO: check this method: it doesn't observe the CA.
 // switchMarketApi swithches the context of market api according to the client's request.
 func (p *ProductsFilter) switchMarketApi(market entities.Market) error {
 	if market == entities.Wildberries {
-		p.api = api.NewWildberriesAPI(p.logger, 1.4, p.chrome.GetContext())
+		p.api = api.NewWildberriesAPI(p.logger, 1.2, p.chrome.GetContext())
 		return nil
 	}
 	return ErrChooseMarket

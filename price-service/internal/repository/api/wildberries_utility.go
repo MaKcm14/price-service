@@ -88,8 +88,21 @@ func (v wildberriesViewer) getProductCatalogLink(productID int) string {
 	return fmt.Sprintf("https://www.wildberries.ru/catalog/%d/detail.aspx", productID)
 }
 
-// getImageLinks gets image links for the products.
-func (p wildberriesParser) getImageLinks(html string) []string {
+// getHiddenApiURL returns the full hidden API-url for the "search.wb.ru" with the set filters.
+func (p wildberriesViewer) getHiddenApiURL(request entities.ProductRequest, filters []string) string {
+	return fmt.Sprintf("%s?"+
+		"ab_testing=false&%s&%s", searchAPIPath,
+		wildberriesGeoString, p.getHiddenApiPath(request, filters))
+}
+
+// getOpenApiURL returns the full open API-url for the "www.wildberries.ru" with the set filters.
+func (p wildberriesViewer) getOpenApiURL(request entities.ProductRequest, filters []string) string {
+	return fmt.Sprintf("%s?%s", wildberriesOpenAPIPath,
+		p.getOpenApiPath(request, filters))
+}
+
+// parseImageLinks parses the image links for the products from the current html-page.
+func (p wildberriesParser) parseImageLinks(html string) []string {
 	const serviceType = "wildberries.service.image-links-getter"
 
 	if !strings.Contains(html, "article") {

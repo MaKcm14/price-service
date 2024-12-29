@@ -151,9 +151,7 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request entities.ProductRe
 		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %v", serviceType, ErrConnectionClosed)
 	}
 
-	sample, err := w.getProductsSample(fmt.Sprintf("%s?"+
-		"ab_testing=false&%s&%s", searchAPIPath,
-		wildberriesGeoString, w.view.getHiddenApiPath(request, filters)))
+	sample, err := w.getProductsSample(w.view.getHiddenApiURL(request, filters))
 
 	if err != nil {
 		return entities.ProductSample{}, err
@@ -164,8 +162,7 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request entities.ProductRe
 		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %v", serviceType, ErrConnectionClosed)
 	}
 
-	htmlSourceLink := fmt.Sprintf("%s?%s", wildberriesOpenAPIPath,
-		w.view.getOpenApiPath(request, filters))
+	htmlSourceLink := w.view.getOpenApiURL(request, filters)
 
 	imageLinks := make([]string, 0, 100)
 
@@ -176,7 +173,7 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request entities.ProductRe
 			return entities.ProductSample{}, err
 		}
 
-		imageLinks = w.parser.getImageLinks(html)
+		imageLinks = w.parser.parseImageLinks(html)
 	}
 
 	for i, j := 0, 0; i != len(sample); i++ {
