@@ -13,18 +13,21 @@ import (
 type ProductsFilter struct {
 	logger *slog.Logger
 	api    ApiInteractor
+	chrome Driver
 }
 
-func NewProductsFilter(log *slog.Logger) ProductsFilter {
+func NewProductsFilter(log *slog.Logger, chrome Driver) ProductsFilter {
 	return ProductsFilter{
 		logger: log,
+		chrome: chrome,
 	}
 }
 
+// TODO: check this method: it doesn't observer the CA.
 // switchMarketApi swithches the context of market api according to the client's request.
 func (p *ProductsFilter) switchMarketApi(market entities.Market) error {
 	if market == entities.Wildberries {
-		p.api = api.NewWildberriesAPI(p.logger, 1.4)
+		p.api = api.NewWildberriesAPI(p.logger, 1.4, p.chrome.GetContext())
 		return nil
 	}
 	return ErrChooseMarket

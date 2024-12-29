@@ -24,15 +24,17 @@ type WildberriesAPI struct {
 	loadCoeff time.Duration
 	parser    wildberriesParser
 	view      wildberriesViewer
+	ctx       context.Context
 }
 
-func NewWildberriesAPI(log *slog.Logger, loadCoeff float32) WildberriesAPI {
+func NewWildberriesAPI(log *slog.Logger, loadCoeff float32, ctx context.Context) WildberriesAPI {
 	return WildberriesAPI{
 		logger:    log,
 		loadCoeff: time.Duration(loadCoeff),
 		parser: wildberriesParser{
 			logger: log,
 		},
+		ctx: ctx,
 	}
 }
 
@@ -43,20 +45,13 @@ func (w WildberriesAPI) getHtmlPage(url string, request entities.ProductRequest)
 	var err error
 	var html string
 
-	ctx, cancel := chromedp.NewExecAllocator(context.Background(),
-		append(chromedp.DefaultExecAllocatorOptions[:], chromedp.Flag("headless", false))...)
-	defer cancel()
-
-	ctx, cancel = chromedp.NewContext(ctx)
-	defer cancel()
-
 	if request.Amount == "min" {
-		_, err = chromedp.RunResponse(ctx,
+		_, err = chromedp.RunResponse(w.ctx,
 			chromedp.Navigate(url),
 			chromedp.InnerHTML("[class='product-card-list']", &html),
 		)
 	} else if request.Amount == "max" {
-		_, err = chromedp.RunResponse(ctx,
+		_, err = chromedp.RunResponse(w.ctx,
 			chromedp.Navigate(url),
 			chromedp.Sleep(3000*w.loadCoeff*time.Millisecond),
 			chromedp.KeyEvent(kb.End),

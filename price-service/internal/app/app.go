@@ -8,12 +8,14 @@ import (
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/config"
 	"github.com/MaKcm14/best-price-service/price-service/internal/controller"
+	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 )
 
 // App unions every parts of the application.
 type App struct {
 	appContr Runner
+	chrome   services.Driver
 	logger   *slog.Logger
 	logFile  *os.File
 }
@@ -35,18 +37,22 @@ func NewApp() App {
 		panic(err)
 	}
 
+	chrome := api.NewChromePull()
+
 	return App{
-		appContr: controller.NewHttpController(echo.New(), log, services.NewProductsFilter(log), conf.Socket),
+		appContr: controller.NewHttpController(echo.New(), log, services.NewProductsFilter(log, chrome), conf.Socket),
 		logger:   log,
 		logFile:  logFile,
+		chrome:   chrome,
 	}
 }
 
 // Run starts the configured application.
-func (app App) Run() {
-	defer app.logFile.Close()
-	defer app.logger.Info("the app was STOPPED")
+func (a App) Run() {
+	defer a.chrome.Close()
+	defer a.logFile.Close()
+	defer a.logger.Info("the app was STOPPED")
 
-	app.logger.Info("the app was STARTED")
-	app.appContr.Run()
+	a.logger.Info("the app was STARTED")
+	a.appContr.Run()
 }
