@@ -1,4 +1,4 @@
-package strainer
+package filter
 
 import (
 	"github.com/labstack/echo/v4"
@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	MarketsFilterAdapter interface {
+	CommonFilterAdapter interface {
 		FilterByMarkets(ctx echo.Context, request dto.ProductRequest) ([]entities.ProductSample, error)
 	}
 
@@ -19,7 +19,7 @@ type (
 	}
 
 	Filter interface {
-		MarketsFilterAdapter
+		CommonFilterAdapter
 		PriceFilterAdapter
 	}
 )

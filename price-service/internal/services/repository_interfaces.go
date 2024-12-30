@@ -15,18 +15,18 @@ type (
 		Close()
 	}
 
-	MarketsSifter interface {
+	CommonParser interface {
 		GetProducts(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error)
 	}
 
-	PriceSifter interface {
+	PriceParser interface {
 		GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error)
 		GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest, exactPrice int) (entities.ProductSample, error)
 		GetProductsWithBestPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error)
 	}
 
 	ApiInteractor interface {
-		PriceSifter
-		MarketsSifter
+		PriceParser
+		CommonParser
 	}
 )

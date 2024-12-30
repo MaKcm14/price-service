@@ -29,10 +29,10 @@ type WildberriesAPI struct {
 	ctx       context.Context
 }
 
-func NewWildberriesAPI(ctx context.Context, log *slog.Logger, loadCoeff float32) WildberriesAPI {
+func NewWildberriesAPI(ctx context.Context, log *slog.Logger, loadCoeff int) WildberriesAPI {
 	return WildberriesAPI{
 		logger:    log,
-		loadCoeff: time.Duration(loadCoeff),
+		loadCoeff: time.Duration(loadCoeff) * time.Millisecond,
 		parser: wildberriesParser{
 			logger: log,
 		},
@@ -55,15 +55,15 @@ func (w WildberriesAPI) getHtmlPage(url string, request dto.ProductRequest) (str
 	} else if request.Amount == "max" {
 		_, err = chromedp.RunResponse(w.ctx,
 			chromedp.Navigate(url),
-			chromedp.Sleep(3000*w.loadCoeff*time.Millisecond),
+			chromedp.Sleep(3000*time.Millisecond+w.loadCoeff),
 			chromedp.KeyEvent(kb.End),
-			chromedp.Sleep(1000*w.loadCoeff*time.Millisecond),
+			chromedp.Sleep(1000*time.Millisecond+w.loadCoeff),
 			chromedp.KeyEvent(kb.End),
-			chromedp.Sleep(1000*w.loadCoeff*time.Millisecond),
+			chromedp.Sleep(1000*time.Millisecond+w.loadCoeff),
 			chromedp.KeyEvent(kb.End),
-			chromedp.Sleep(1000*w.loadCoeff*time.Millisecond),
+			chromedp.Sleep(1000*time.Millisecond+w.loadCoeff),
 			chromedp.KeyEvent(kb.End),
-			chromedp.Sleep(4000*w.loadCoeff*time.Millisecond),
+			chromedp.Sleep(4000*time.Millisecond+w.loadCoeff),
 			chromedp.InnerHTML("[class='product-card-list']", &html),
 		)
 	}
@@ -98,7 +98,7 @@ func (w WildberriesAPI) readResponseBody(source io.Reader) ([]byte, error) {
 }
 
 // getProductsSample gets the json-view structs of the products connected with the current "sample".
-func (w WildberriesAPI) getProductsSample(url string) ([]wildberriesProduct, error) {
+func (w WildberriesAPI) getProductSample(url string) ([]wildberriesProduct, error) {
 	const serviceType = "wildberries.service.search.wb.ru-products-getter"
 
 	sample := struct {
@@ -153,7 +153,7 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request dto.ProductRequest
 		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed)
 	}
 
-	sample, err := w.getProductsSample(w.view.getHiddenApiURL(request, filters))
+	sample, err := w.getProductSample(w.view.getHiddenApiURL(request, filters))
 
 	if err != nil {
 		return entities.ProductSample{}, err
@@ -177,6 +177,10 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request dto.ProductRequest
 
 		imageLinks = w.parser.parseImageLinks(html)
 	}
+
+	///DEBUG:
+	fmt.Println(len(sample), len(imageLinks))
+	///TODO: delete
 
 	for i, j := 0, 0; i != len(sample); i++ {
 		var image string
@@ -221,5 +225,5 @@ func (w WildberriesAPI) GetProductsWithExactPrice(ctx echo.Context, request dto.
 
 // GetProductsByBestPrice gets the products with filter by min price.
 func (w WildberriesAPI) GetProductsWithBestPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
-	return w.getProducts(ctx, request, "sort", "priceup")
+	return w.getProducts(ctx, request, "sort", string(dto.PriceUpSort))
 }

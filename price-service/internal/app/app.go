@@ -12,7 +12,7 @@ import (
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api/wildb"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
-	"github.com/MaKcm14/best-price-service/price-service/internal/services/strainer"
+	"github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
 )
 
 // App unions every parts of the application.
@@ -41,11 +41,11 @@ func NewService() Service {
 
 	return Service{
 		appContr: chttp.NewController(echo.New(), log,
-			strainer.NewProductsFilter(
+			filter.New(
 				log,
 				map[entities.Market]services.ApiInteractor{
-					entities.Wildberries: wildb.NewWildberriesAPI(chrome.NewContext(), log, 1.2),
-					//entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log, 1.2),
+					entities.Wildberries: wildb.NewWildberriesAPI(chrome.NewContext(), log, 1),
+					//entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log, 1),
 				})),
 		logger:  log,
 		logFile: logFile,

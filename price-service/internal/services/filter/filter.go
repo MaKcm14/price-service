@@ -1,4 +1,4 @@
-package strainer
+package filter
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type ProductsFilter struct {
 	marketsApi map[entities.Market]services.ApiInteractor
 }
 
-func NewProductsFilter(log *slog.Logger, markets map[entities.Market]services.ApiInteractor) ProductsFilter {
+func New(log *slog.Logger, markets map[entities.Market]services.ApiInteractor) ProductsFilter {
 	return ProductsFilter{
 		logger:     log,
 		marketsApi: markets,

@@ -11,7 +11,7 @@ import (
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
 )
 
-type queryOpts func(ctx echo.Context, request *dto.ProductRequest) error
+type queryOpt func(ctx echo.Context, request *dto.ProductRequest) error
 
 type (
 	checker struct{}
@@ -118,7 +118,7 @@ func (v validator) validNoImage(ctx echo.Context, request *dto.ProductRequest) e
 }
 
 // validProductRequest validates the info from the URL-query's params.
-func (v validator) validProductRequest(ctx echo.Context, opts ...queryOpts) (dto.ProductRequest, error) {
+func (v validator) validProductRequest(ctx echo.Context, opts ...queryOpt) (dto.ProductRequest, error) {
 	var request dto.ProductRequest
 
 	for _, opt := range opts {

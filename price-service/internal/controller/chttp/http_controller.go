@@ -8,18 +8,18 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/services/strainer"
+	filter "github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
 )
 
 // Controller handles the clients' requests.
 type Controller struct {
 	contr  *echo.Echo
 	logger *slog.Logger
-	filter strainer.Filter
+	filter filter.Filter
 	valid  validator
 }
 
-func NewController(contr *echo.Echo, logger *slog.Logger, filter strainer.Filter) Controller {
+func NewController(contr *echo.Echo, logger *slog.Logger, filter filter.Filter) Controller {
 	return Controller{
 		contr:  contr,
 		logger: logger,

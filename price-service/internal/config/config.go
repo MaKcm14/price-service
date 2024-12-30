@@ -12,7 +12,6 @@ type SettingOpt func(*Settings, *slog.Logger) error
 
 // Settings sets the application's configurations.
 type Settings struct {
-	DSN    string
 	Socket string
 }
 
