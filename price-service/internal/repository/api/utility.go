@@ -11,17 +11,19 @@ const (
 	Wildberries string = "Wildberries"
 )
 
+// ChromePull supports the safe opening and closing the connection with the instances of the browser.
 type ChromePull struct {
 	cancels []context.CancelFunc
 }
 
-func NewChromePull() ChromePull {
-	return ChromePull{
+func NewChromePull() *ChromePull {
+	return &ChromePull{
 		cancels: make([]context.CancelFunc, 0, 100),
 	}
 }
 
-func (c ChromePull) NewContext() context.Context {
+// NewContext creates a new context.Context that connected with the allocated browser.
+func (c *ChromePull) NewContext() context.Context {
 	ctx, cancel := chromedp.NewExecAllocator(context.Background(),
 		append(chromedp.DefaultExecAllocatorOptions[:], chromedp.Flag("headless", false))...)
 	c.cancels = append(c.cancels, cancel)
@@ -32,13 +34,15 @@ func (c ChromePull) NewContext() context.Context {
 	return ctx
 }
 
+// Close closes all the connections that were created with the NewContext.
 func (c ChromePull) Close() {
-	c.cancels[0]()
-	c.cancels[1]()
+	for _, cancel := range c.cancels {
+		cancel()
+	}
 }
 
-// isConnectionClosed checks is the connection with the client is still alive.
-func isConnectionClosed(ctx echo.Context) bool {
+// IsConnectionClosed checks is the connection with the client is still alive.
+func IsConnectionClosed(ctx echo.Context) bool {
 	select {
 	case <-ctx.Request().Context().Done():
 		return true

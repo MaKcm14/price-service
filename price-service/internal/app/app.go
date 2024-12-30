@@ -7,31 +7,30 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/config"
-	"github.com/MaKcm14/best-price-service/price-service/internal/controller"
+	"github.com/MaKcm14/best-price-service/price-service/internal/controller/chttp"
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
+	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api/wildb"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
+	"github.com/MaKcm14/best-price-service/price-service/internal/services/strainer"
 )
 
 // App unions every parts of the application.
-type App struct {
-	appContr Runner
+type Service struct {
+	appContr chttp.Controller
 	chrome   services.Driver
 	logger   *slog.Logger
 	logFile  *os.File
+	appSet   config.Settings
 }
 
-type Runner interface {
-	Run()
-}
-
-func NewApp() App {
+func NewService() Service {
 	logFile, _ := os.Create("log.txt")
 	log := slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
 	log.Info("main application's configuring begun")
 
-	conf, err := config.NewConfig(log, config.Socket)
+	appSet, err := config.NewSettings(log, config.Socket)
 
 	if err != nil {
 		logFile.Close()
@@ -40,26 +39,26 @@ func NewApp() App {
 
 	chrome := api.NewChromePull()
 
-	return App{
-		appContr: controller.NewHttpController(echo.New(), log,
-			services.NewProductsFilter(
+	return Service{
+		appContr: chttp.NewController(echo.New(), log,
+			strainer.NewProductsFilter(
 				log,
 				map[entities.Market]services.ApiInteractor{
-					entities.Wildberries: api.NewWildberriesAPI(log, 1.2, chrome.NewContext()),
-				},
-			), conf.Socket),
+					entities.Wildberries: wildb.NewWildberriesAPI(log, 1.2, chrome.NewContext()),
+				})),
 		logger:  log,
 		logFile: logFile,
 		chrome:  chrome,
+		appSet:  appSet,
 	}
 }
 
 // Run starts the configured application.
-func (a App) Run() {
+func (a Service) Run() {
 	defer a.chrome.Close()
 	defer a.logFile.Close()
 	defer a.logger.Info("the app was STOPPED")
 
 	a.logger.Info("the app was STARTED")
-	a.appContr.Run()
+	a.appContr.Run(a.appSet.Socket)
 }

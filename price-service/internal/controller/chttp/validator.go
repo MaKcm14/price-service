@@ -1,4 +1,4 @@
-package controller
+package chttp
 
 import (
 	"net/url"
@@ -8,9 +8,10 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
+	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
 )
 
-type queryOpts func(ctx echo.Context, request *entities.ProductRequest) error
+type queryOpts func(ctx echo.Context, request *dto.ProductRequest) error
 
 type (
 	checker struct{}
@@ -38,7 +39,7 @@ func (c checker) isDataSafe(data string) bool {
 }
 
 // validQuery validates the product query.
-func (v validator) validQuery(ctx echo.Context, request *entities.ProductRequest) error {
+func (v validator) validQuery(ctx echo.Context, request *dto.ProductRequest) error {
 	if query := ctx.QueryParam("query"); v.check.isDataSafe(query) && len(query) != 0 {
 		request.Query, _ = url.QueryUnescape(query)
 		return nil
@@ -47,7 +48,7 @@ func (v validator) validQuery(ctx echo.Context, request *entities.ProductRequest
 }
 
 // validSample validates the param "sample" that defines the num of the products' sample.
-func (v validator) validSample(ctx echo.Context, request *entities.ProductRequest) error {
+func (v validator) validSample(ctx echo.Context, request *dto.ProductRequest) error {
 	sample, err := strconv.Atoi(ctx.QueryParam("sample"))
 
 	if sample < 0 {
@@ -61,7 +62,7 @@ func (v validator) validSample(ctx echo.Context, request *entities.ProductReques
 }
 
 // validMarkets validates the param "markets" that defines the markets where products will be searched.
-func (v validator) validMarkets(ctx echo.Context, request *entities.ProductRequest) error {
+func (v validator) validMarkets(ctx echo.Context, request *dto.ProductRequest) error {
 	for _, market := range strings.Split(ctx.QueryParam("markets"), " ") {
 		if market == "wildberries" {
 			request.Markets = append(request.Markets, entities.Wildberries)
@@ -80,7 +81,7 @@ func (v validator) validMarkets(ctx echo.Context, request *entities.ProductReque
 }
 
 // validAmount validates the param "amount" that defines the amount of products.
-func (v validator) validAmount(ctx echo.Context, request *entities.ProductRequest) error {
+func (v validator) validAmount(ctx echo.Context, request *dto.ProductRequest) error {
 	request.Amount = ctx.QueryParam("amount")
 
 	if amt := request.Amount; amt != "max" && amt != "min" {
@@ -91,12 +92,12 @@ func (v validator) validAmount(ctx echo.Context, request *entities.ProductReques
 }
 
 // validSort validates the param "sort" that defines the sort of sample.
-func (v validator) validSort(ctx echo.Context, request *entities.ProductRequest) error {
-	request.Sort = ctx.QueryParam("sort")
+func (v validator) validSort(ctx echo.Context, request *dto.ProductRequest) error {
+	request.Sort = dto.SortType(ctx.QueryParam("sort"))
 
-	if sort := request.Sort; sort != "popular" && sort != "pricedown" && sort != "priceup" &&
-		sort != "rate" && sort != "newly" {
-		request.Sort = "popular"
+	if sort := request.Sort; sort != dto.PopularSort && sort != dto.PriceDownSort && sort != dto.PriceUpSort &&
+		sort != dto.RateSort && sort != dto.NewlySort {
+		request.Sort = dto.PopularSort
 	}
 
 	return nil
@@ -104,7 +105,7 @@ func (v validator) validSort(ctx echo.Context, request *entities.ProductRequest)
 
 // validNoImage validates the param "no-image" that defines the presense the image-links in
 // the response.
-func (v validator) validNoImage(ctx echo.Context, request *entities.ProductRequest) error {
+func (v validator) validNoImage(ctx echo.Context, request *dto.ProductRequest) error {
 	flagNoImage := ctx.QueryParam("no-image")
 
 	request.FlagNoImage = true
@@ -117,14 +118,14 @@ func (v validator) validNoImage(ctx echo.Context, request *entities.ProductReque
 }
 
 // validProductRequest validates the info from the URL-query's params.
-func (v validator) validProductRequest(ctx echo.Context, opts ...queryOpts) (entities.ProductRequest, error) {
-	var request entities.ProductRequest
+func (v validator) validProductRequest(ctx echo.Context, opts ...queryOpts) (dto.ProductRequest, error) {
+	var request dto.ProductRequest
 
 	for _, opt := range opts {
 		err := opt(ctx, &request)
 
 		if err != nil {
-			return entities.ProductRequest{}, err
+			return dto.ProductRequest{}, err
 		}
 	}
 

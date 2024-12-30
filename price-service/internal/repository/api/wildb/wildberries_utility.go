@@ -1,4 +1,4 @@
-package api
+package wildb
 
 import (
 	"fmt"
@@ -8,7 +8,8 @@ import (
 
 	"github.com/anaskhan96/soup"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
+	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
+	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
 )
 
 const (
@@ -33,7 +34,7 @@ type (
 
 	// wildberriesViewer defines the logic of the queries' parameters format.
 	wildberriesViewer struct {
-		converter converter
+		converter api.URLConverter
 	}
 
 	// wildberriesParser defines the logic of parsing the wildberries' service sources.
@@ -44,9 +45,9 @@ type (
 
 // getOpenApiPath returns the correct URL's path for wildberries open API.
 // It uses with domain "www.wildberries.ru".
-func (v wildberriesViewer) getOpenApiPath(request entities.ProductRequest, filters []string) string {
+func (v wildberriesViewer) getOpenApiPath(request dto.ProductRequest, filters []string) string {
 	var path string
-	filtersURL := v.converter.getFilters(filters)
+	filtersURL := v.converter.GetFilters(filters)
 
 	path += fmt.Sprintf("page=%d", request.Sample)
 	path += "&sort=" + filtersURL["sort"]
@@ -62,9 +63,9 @@ func (v wildberriesViewer) getOpenApiPath(request entities.ProductRequest, filte
 
 // getHiddenApiPath returns the correct URL's path for wildberries hidden API.
 // It uses with domain "search.wb.ru".
-func (v wildberriesViewer) getHiddenApiPath(request entities.ProductRequest, filters []string) string {
+func (v wildberriesViewer) getHiddenApiPath(request dto.ProductRequest, filters []string) string {
 	var path string
-	filtersURL := v.converter.getFilters(filters)
+	filtersURL := v.converter.GetFilters(filters)
 
 	path += fmt.Sprintf("page=%d", request.Sample)
 
@@ -89,14 +90,14 @@ func (v wildberriesViewer) getProductCatalogLink(productID int) string {
 }
 
 // getHiddenApiURL returns the full hidden API-url for the "search.wb.ru" with the set filters.
-func (p wildberriesViewer) getHiddenApiURL(request entities.ProductRequest, filters []string) string {
+func (p wildberriesViewer) getHiddenApiURL(request dto.ProductRequest, filters []string) string {
 	return fmt.Sprintf("%s?"+
 		"ab_testing=false&%s&%s", searchAPIPath,
 		wildberriesGeoString, p.getHiddenApiPath(request, filters))
 }
 
 // getOpenApiURL returns the full open API-url for the "www.wildberries.ru" with the set filters.
-func (p wildberriesViewer) getOpenApiURL(request entities.ProductRequest, filters []string) string {
+func (p wildberriesViewer) getOpenApiURL(request dto.ProductRequest, filters []string) string {
 	return fmt.Sprintf("%s?%s", wildberriesOpenAPIPath,
 		p.getOpenApiPath(request, filters))
 }
@@ -106,7 +107,7 @@ func (p wildberriesParser) parseImageLinks(html string) []string {
 	const serviceType = "wildberries.service.image-links-getter"
 
 	if !strings.Contains(html, "article") {
-		p.logger.Warn(fmt.Sprintf("error of the %v: %v: images couldn't be load", serviceType, ErrServiceResponse))
+		p.logger.Warn(fmt.Sprintf("error of the %v: %v: images couldn't be load", serviceType, api.ErrServiceResponse))
 		return nil
 	}
 
