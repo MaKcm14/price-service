@@ -1,4 +1,4 @@
-package services
+package filter
 
 import (
 	"fmt"
@@ -7,42 +7,48 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
-	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
+	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
+	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 )
 
 type ProductsFilter struct {
-	logger *slog.Logger
-	api    ApiInteractor
+	logger     *slog.Logger
+	marketsApi map[entities.Market]services.ApiInteractor
 }
 
-func NewProductsFilter(log *slog.Logger) ProductsFilter {
+func New(log *slog.Logger, markets map[entities.Market]services.ApiInteractor) ProductsFilter {
 	return ProductsFilter{
-		logger: log,
+		logger:     log,
+		marketsApi: markets,
 	}
 }
 
-// switchMarketApi swithches the context of market api according to the client's request.
-func (p *ProductsFilter) switchMarketApi(market entities.Market) error {
-	if market == entities.Wildberries {
-		p.api = api.NewWildberriesAPI(p.logger, 1.4)
-		return nil
+// getMarketApi returns the requested marketApi wrapped in the ApiInteractor.
+func (p *ProductsFilter) getMarketApi(market entities.Market) (services.ApiInteractor, error) {
+	marketApi, flagExist := p.marketsApi[market]
+
+	if !flagExist {
+		return nil, services.ErrMarketApi
 	}
-	return ErrChooseMarket
+
+	return marketApi, nil
 }
 
 // FilterByMarkets defines the logic of the getting and processing the products' sample
 // from the markets' responses filtered only by markets and non-specified parameters.
-func (p ProductsFilter) FilterByMarkets(ctx echo.Context, request entities.ProductRequest) ([]entities.ProductSample, error) {
+func (p ProductsFilter) FilterByMarkets(ctx echo.Context, request dto.ProductRequest) ([]entities.ProductSample, error) {
 	const serviceType = "filter.service.filter-by-markets"
 	var products = make([]entities.ProductSample, 0, 1000)
 
 	for _, market := range request.Markets {
-		if err := p.switchMarketApi(market); err != nil {
+		marketApi, err := p.getMarketApi(market)
+
+		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
 			continue
 		}
 
-		sample, err := p.api.GetProducts(ctx, request)
+		sample, err := marketApi.GetProducts(ctx, request)
 
 		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
@@ -53,7 +59,7 @@ func (p ProductsFilter) FilterByMarkets(ctx echo.Context, request entities.Produ
 	}
 
 	if len(products) == 0 {
-		return nil, ErrGettingProducts
+		return nil, services.ErrGettingProducts
 	}
 
 	return products, nil
@@ -62,17 +68,19 @@ func (p ProductsFilter) FilterByMarkets(ctx echo.Context, request entities.Produ
 // FilterByPriceRange defines the logic of the getting and processing the products' sample
 // from the markets' responses constrained by the markets' filters and two boundaries of
 // the price range.
-func (p ProductsFilter) FilterByPriceRange(ctx echo.Context, request entities.ProductRequest, priceDown int, priceUp int) ([]entities.ProductSample, error) {
+func (p ProductsFilter) FilterByPriceRange(ctx echo.Context, request dto.ProductRequest, priceDown int, priceUp int) ([]entities.ProductSample, error) {
 	const serviceType = "filter.service.filter-by-price-range"
 	var products = make([]entities.ProductSample, 0, 1000)
 
 	for _, market := range request.Markets {
-		if err := p.switchMarketApi(market); err != nil {
+		marketApi, err := p.getMarketApi(market)
+
+		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
 			continue
 		}
 
-		sample, err := p.api.GetProductsWithPriceRange(ctx, request, priceDown, priceUp)
+		sample, err := marketApi.GetProductsWithPriceRange(ctx, request, priceDown, priceUp)
 
 		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
@@ -83,7 +91,7 @@ func (p ProductsFilter) FilterByPriceRange(ctx echo.Context, request entities.Pr
 	}
 
 	if len(products) == 0 {
-		return nil, ErrGettingProducts
+		return nil, services.ErrGettingProducts
 	}
 
 	return products, nil
@@ -91,17 +99,19 @@ func (p ProductsFilter) FilterByPriceRange(ctx echo.Context, request entities.Pr
 
 // FilterBestPrice defines the logic of the getting and processing the products' sample
 // from the markets' responses contrained by the markets' filters and the minimal price of the sample.
-func (p ProductsFilter) FilterByBestPrice(ctx echo.Context, request entities.ProductRequest) ([]entities.ProductSample, error) {
+func (p ProductsFilter) FilterByBestPrice(ctx echo.Context, request dto.ProductRequest) ([]entities.ProductSample, error) {
 	const serviceType = "filter.service.filter-by-best-price"
 	var products = make([]entities.ProductSample, 0, 1000)
 
 	for _, market := range request.Markets {
-		if err := p.switchMarketApi(market); err != nil {
+		marketApi, err := p.getMarketApi(market)
+
+		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
 			continue
 		}
 
-		sample, err := p.api.GetProductsWithBestPrice(ctx, request)
+		sample, err := marketApi.GetProductsWithBestPrice(ctx, request)
 
 		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
@@ -112,7 +122,7 @@ func (p ProductsFilter) FilterByBestPrice(ctx echo.Context, request entities.Pro
 	}
 
 	if len(products) == 0 {
-		return nil, ErrGettingProducts
+		return nil, services.ErrGettingProducts
 	}
 
 	return products, nil
@@ -121,17 +131,19 @@ func (p ProductsFilter) FilterByBestPrice(ctx echo.Context, request entities.Pro
 // FilterByExactPrice defines the logic of the getting and processing the products' sample
 // from the markets' responses constrained by the markets' filters and the products that
 // have got the exactest prices to the client's price.
-func (p ProductsFilter) FilterByExactPrice(ctx echo.Context, request entities.ProductRequest, exactPrice int) ([]entities.ProductSample, error) {
+func (p ProductsFilter) FilterByExactPrice(ctx echo.Context, request dto.ProductRequest, exactPrice int) ([]entities.ProductSample, error) {
 	const serviceType = "filter.service.filter-by-exact-price"
 	var products = make([]entities.ProductSample, 0, 1000)
 
 	for _, market := range request.Markets {
-		if err := p.switchMarketApi(market); err != nil {
+		marketApi, err := p.getMarketApi(market)
+
+		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
 			continue
 		}
 
-		sample, err := p.api.GetProductsWithExactPrice(ctx, request, exactPrice)
+		sample, err := marketApi.GetProductsWithExactPrice(ctx, request, exactPrice)
 
 		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
@@ -142,7 +154,7 @@ func (p ProductsFilter) FilterByExactPrice(ctx echo.Context, request entities.Pr
 	}
 
 	if len(products) == 0 {
-		return nil, ErrGettingProducts
+		return nil, services.ErrGettingProducts
 	}
 
 	return products, nil

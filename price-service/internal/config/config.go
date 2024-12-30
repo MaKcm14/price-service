@@ -8,11 +8,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type ConfigOpts func(*Config, *slog.Logger) error
+type SettingOpt func(*Settings, *slog.Logger) error
 
-// Config sets the application's configurations.
-type Config struct {
-	DSN    string
+// Settings sets the application's configurations.
+type Settings struct {
 	Socket string
 }
 
@@ -30,32 +29,32 @@ func configEnv(key string, log *slog.Logger) (string, error) {
 }
 
 // Socket configs the Socket ENV.
-func Socket(config *Config, log *slog.Logger) error {
+func Socket(appSet *Settings, log *slog.Logger) error {
 	socket, err := configEnv("SOCKET", log)
 
 	if err != nil {
 		return err
 	}
-	config.Socket = socket
+	appSet.Socket = socket
 
 	return nil
 }
 
-func NewConfig(log *slog.Logger, opts ...ConfigOpts) (Config, error) {
-	config := Config{}
+func NewSettings(log *slog.Logger, opts ...SettingOpt) (Settings, error) {
+	appSet := Settings{}
 	err := godotenv.Load("../../.env")
 
 	if err != nil {
 		envErr := fmt.Errorf("error while loading the .env file (check it and try again): %v", err)
 		log.Error(envErr.Error())
-		return Config{}, envErr
+		return Settings{}, envErr
 	}
 
 	for _, opt := range opts {
-		if err := opt(&config, log); err != nil {
-			return Config{}, err
+		if err := opt(&appSet, log); err != nil {
+			return Settings{}, err
 		}
 	}
 
-	return config, nil
+	return appSet, nil
 }
