@@ -44,7 +44,8 @@ func NewService() Service {
 			strainer.NewProductsFilter(
 				log,
 				map[entities.Market]services.ApiInteractor{
-					entities.Wildberries: wildb.NewWildberriesAPI(log, 1.2, chrome.NewContext()),
+					entities.Wildberries: wildb.NewWildberriesAPI(chrome.NewContext(), log, 1.2),
+					//entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log, 1.2),
 				})),
 		logger:  log,
 		logFile: logFile,

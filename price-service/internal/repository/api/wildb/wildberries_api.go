@@ -29,7 +29,7 @@ type WildberriesAPI struct {
 	ctx       context.Context
 }
 
-func NewWildberriesAPI(log *slog.Logger, loadCoeff float32, ctx context.Context) WildberriesAPI {
+func NewWildberriesAPI(ctx context.Context, log *slog.Logger, loadCoeff float32) WildberriesAPI {
 	return WildberriesAPI{
 		logger:    log,
 		loadCoeff: time.Duration(loadCoeff),

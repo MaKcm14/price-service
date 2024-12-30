@@ -9,6 +9,7 @@ import (
 
 const (
 	Wildberries string = "Wildberries"
+	MegaMarket  string = "MegaMarket"
 )
 
 // ChromePull supports the safe opening and closing the connection with the instances of the browser.
