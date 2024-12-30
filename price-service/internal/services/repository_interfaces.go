@@ -10,7 +10,7 @@ import (
 
 type (
 	Driver interface {
-		GetContext() context.Context
+		NewContext() context.Context
 		Close()
 	}
 

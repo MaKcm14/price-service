@@ -8,6 +8,7 @@ import (
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/config"
 	"github.com/MaKcm14/best-price-service/price-service/internal/controller"
+	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 )
@@ -40,10 +41,16 @@ func NewApp() App {
 	chrome := api.NewChromePull()
 
 	return App{
-		appContr: controller.NewHttpController(echo.New(), log, services.NewProductsFilter(log, chrome), conf.Socket),
-		logger:   log,
-		logFile:  logFile,
-		chrome:   chrome,
+		appContr: controller.NewHttpController(echo.New(), log,
+			services.NewProductsFilter(
+				log,
+				map[entities.Market]services.ApiInteractor{
+					entities.Wildberries: api.NewWildberriesAPI(log, 1.2, chrome.NewContext()),
+				},
+			), conf.Socket),
+		logger:  log,
+		logFile: logFile,
+		chrome:  chrome,
 	}
 }
 

@@ -7,30 +7,29 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
-	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
 )
 
 type ProductsFilter struct {
-	logger *slog.Logger
-	api    ApiInteractor
-	chrome Driver
+	logger     *slog.Logger
+	marketsApi map[entities.Market]ApiInteractor
 }
 
-func NewProductsFilter(log *slog.Logger, chrome Driver) ProductsFilter {
+func NewProductsFilter(log *slog.Logger, markets map[entities.Market]ApiInteractor) ProductsFilter {
 	return ProductsFilter{
-		logger: log,
-		chrome: chrome,
+		logger:     log,
+		marketsApi: markets,
 	}
 }
 
-// TODO: check this method: it doesn't observe the CA.
-// switchMarketApi swithches the context of market api according to the client's request.
-func (p *ProductsFilter) switchMarketApi(market entities.Market) error {
-	if market == entities.Wildberries {
-		p.api = api.NewWildberriesAPI(p.logger, 1.2, p.chrome.GetContext())
-		return nil
+// getMarketApi returns the requested marketApi wrapped in the ApiInteractor.
+func (p *ProductsFilter) getMarketApi(market entities.Market) (ApiInteractor, error) {
+	marketApi, flagExist := p.marketsApi[market]
+
+	if !flagExist {
+		return nil, ErrChooseMarket
 	}
-	return ErrChooseMarket
+
+	return marketApi, nil
 }
 
 // FilterByMarkets defines the logic of the getting and processing the products' sample
@@ -40,12 +39,14 @@ func (p ProductsFilter) FilterByMarkets(ctx echo.Context, request entities.Produ
 	var products = make([]entities.ProductSample, 0, 1000)
 
 	for _, market := range request.Markets {
-		if err := p.switchMarketApi(market); err != nil {
+		marketApi, err := p.getMarketApi(market)
+
+		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
 			continue
 		}
 
-		sample, err := p.api.GetProducts(ctx, request)
+		sample, err := marketApi.GetProducts(ctx, request)
 
 		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
@@ -70,12 +71,14 @@ func (p ProductsFilter) FilterByPriceRange(ctx echo.Context, request entities.Pr
 	var products = make([]entities.ProductSample, 0, 1000)
 
 	for _, market := range request.Markets {
-		if err := p.switchMarketApi(market); err != nil {
+		marketApi, err := p.getMarketApi(market)
+
+		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
 			continue
 		}
 
-		sample, err := p.api.GetProductsWithPriceRange(ctx, request, priceDown, priceUp)
+		sample, err := marketApi.GetProductsWithPriceRange(ctx, request, priceDown, priceUp)
 
 		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
@@ -99,12 +102,14 @@ func (p ProductsFilter) FilterByBestPrice(ctx echo.Context, request entities.Pro
 	var products = make([]entities.ProductSample, 0, 1000)
 
 	for _, market := range request.Markets {
-		if err := p.switchMarketApi(market); err != nil {
+		marketApi, err := p.getMarketApi(market)
+
+		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
 			continue
 		}
 
-		sample, err := p.api.GetProductsWithBestPrice(ctx, request)
+		sample, err := marketApi.GetProductsWithBestPrice(ctx, request)
 
 		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
@@ -129,12 +134,14 @@ func (p ProductsFilter) FilterByExactPrice(ctx echo.Context, request entities.Pr
 	var products = make([]entities.ProductSample, 0, 1000)
 
 	for _, market := range request.Markets {
-		if err := p.switchMarketApi(market); err != nil {
+		marketApi, err := p.getMarketApi(market)
+
+		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
 			continue
 		}
 
-		sample, err := p.api.GetProductsWithExactPrice(ctx, request, exactPrice)
+		sample, err := marketApi.GetProductsWithExactPrice(ctx, request, exactPrice)
 
 		if err != nil {
 			p.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))

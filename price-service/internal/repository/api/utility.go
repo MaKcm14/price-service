@@ -12,28 +12,24 @@ const (
 )
 
 type ChromePull struct {
-	ctx     context.Context
 	cancels []context.CancelFunc
 }
 
 func NewChromePull() ChromePull {
-	cancels := make([]context.CancelFunc, 0, 2)
-
-	ctx, cancel := chromedp.NewExecAllocator(context.Background(),
-		append(chromedp.DefaultExecAllocatorOptions[:], chromedp.Flag("headless", false))...)
-	cancels = append(cancels, cancel)
-
-	ctx, cancel = chromedp.NewContext(ctx)
-	cancels = append(cancels, cancel)
-
 	return ChromePull{
-		ctx:     ctx,
-		cancels: cancels,
+		cancels: make([]context.CancelFunc, 0, 100),
 	}
 }
 
-func (c ChromePull) GetContext() context.Context {
-	return c.ctx
+func (c ChromePull) NewContext() context.Context {
+	ctx, cancel := chromedp.NewExecAllocator(context.Background(),
+		append(chromedp.DefaultExecAllocatorOptions[:], chromedp.Flag("headless", false))...)
+	c.cancels = append(c.cancels, cancel)
+
+	ctx, cancel = chromedp.NewContext(ctx)
+	c.cancels = append(c.cancels, cancel)
+
+	return ctx
 }
 
 func (c ChromePull) Close() {
