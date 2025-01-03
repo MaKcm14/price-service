@@ -10,6 +10,7 @@ import (
 	"github.com/MaKcm14/best-price-service/price-service/internal/controller/chttp"
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
+	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api/mmega"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api/wildb"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
@@ -45,7 +46,7 @@ func NewService() Service {
 				log,
 				map[entities.Market]services.ApiInteractor{
 					entities.Wildberries: wildb.NewWildberriesAPI(chrome.NewContext(), log, 1),
-					//entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log, 1),
+					entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log, 1),
 				})),
 		logger:  log,
 		logFile: logFile,

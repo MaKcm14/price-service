@@ -50,7 +50,7 @@ func (w WildberriesAPI) getHtmlPage(url string, request dto.ProductRequest) (str
 	if request.Amount == "min" {
 		_, err = chromedp.RunResponse(w.ctx,
 			chromedp.Navigate(url),
-			chromedp.InnerHTML("[class='product-card-list']", &html),
+			chromedp.InnerHTML(fmt.Sprintf("[class='%s']", productContainerClassName), &html),
 		)
 	} else if request.Amount == "max" {
 		_, err = chromedp.RunResponse(w.ctx,
@@ -64,7 +64,7 @@ func (w WildberriesAPI) getHtmlPage(url string, request dto.ProductRequest) (str
 			chromedp.Sleep(1000*time.Millisecond+w.loadCoeff),
 			chromedp.KeyEvent(kb.End),
 			chromedp.Sleep(4000*time.Millisecond+w.loadCoeff),
-			chromedp.InnerHTML("[class='product-card-list']", &html),
+			chromedp.InnerHTML(fmt.Sprintf("[class='%s']", productContainerClassName), &html),
 		)
 	}
 
@@ -203,23 +203,23 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request dto.ProductRequest
 
 // GetProducts gets the products without any filters.
 func (w WildberriesAPI) GetProducts(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
-	return w.getProducts(ctx, request, "sort", string(request.Sort))
+	return w.getProducts(ctx, request, sortID, string(request.Sort))
 }
 
 // GetProductsByPriceRange gets the products with filter by price range.
 func (w WildberriesAPI) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error) {
-	return w.getProducts(ctx, request, "sort", string(request.Sort),
-		"priceU", w.view.getPriceRangeView(priceDown, priceUp))
+	return w.getProducts(ctx, request, sortID, string(request.Sort),
+		priceRangeID, w.view.getPriceRangeView(priceDown, priceUp))
 }
 
 // GetProductsByExactPrice gets the products with filter by price
 // in range [exactPrice, exactPrice + 10% off exactPrice].
 func (w WildberriesAPI) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest, exactPrice int) (entities.ProductSample, error) {
-	return w.getProducts(ctx, request, "sort", string(request.Sort),
-		"priceU", w.view.getPriceRangeView(exactPrice, int(float32(exactPrice)*1.1)))
+	return w.getProducts(ctx, request, sortID, string(request.Sort),
+		priceRangeID, w.view.getPriceRangeView(exactPrice, int(float32(exactPrice)*1.1)))
 }
 
 // GetProductsByBestPrice gets the products with filter by min price.
 func (w WildberriesAPI) GetProductsWithBestPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
-	return w.getProducts(ctx, request, "sort", string(dto.PriceUpSort))
+	return w.getProducts(ctx, request, sortID, string(dto.PriceUpSort))
 }

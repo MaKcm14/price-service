@@ -48,11 +48,13 @@ func (с Controller) Run(socket string) {
 	}
 }
 
+// configController configurates the controller by setting the middlewares and paths.
 func (c *Controller) configController() {
 	c.configMW()
 	c.configPaths()
 }
 
+// configPaths configurates the controller's paths and methods.
 func (c *Controller) configPaths() {
 	c.contr.GET("/products/filter/price/price-range", c.handlePriceRangeRequest)
 	c.contr.GET("/products/filter/price/best-price", c.handleBestPriceRequest)
@@ -60,10 +62,10 @@ func (c *Controller) configPaths() {
 	c.contr.GET("/products/filter/markets", c.handleMarketsRequest)
 }
 
+// configMW configurates the controller's middleware.
 func (c *Controller) configMW() {
 	c.contr.Use(middleware.BodyLimit("600K"))
 	c.contr.Use(middleware.Gzip())
-	c.contr.Use(middleware.CORS())
 
 	c.contr.HTTPErrorHandler = func(err error, ctx echo.Context) {
 		if errHttp, flagCheck := err.(*echo.HTTPError); flagCheck {
@@ -136,7 +138,7 @@ func (c *Controller) handlePriceRangeRequest(ctx echo.Context) error {
 	ctx.Response().Header().Add("Content-Type", "application/json; charset=utf-8")
 	ctx.Response().Header().Add("Cache-Control", "public, max-age=43200")
 
-	return ctx.JSON(http.StatusOK, products)
+	return ctx.JSON(http.StatusOK, response)
 }
 
 // filterByBestPrice defines the logic of the handling the filter-by-minimal-price requests.
@@ -176,7 +178,7 @@ func (c *Controller) handleBestPriceRequest(ctx echo.Context) error {
 	ctx.Response().Header().Add("Content-Type", "application/json; charset=utf-8")
 	ctx.Response().Header().Add("Cache-Control", "public, max-age=43200")
 
-	return ctx.JSON(http.StatusOK, products)
+	return ctx.JSON(http.StatusOK, response)
 }
 
 // filterByExactPrice defines the logic of the handling the filter-by-set-price requests.
@@ -223,7 +225,7 @@ func (c *Controller) handleExactPriceRequest(ctx echo.Context) error {
 	ctx.Response().Header().Add("Content-Type", "application/json; charset=utf-8")
 	ctx.Response().Header().Add("Cache-Control", "public, max-age=43200")
 
-	return ctx.JSON(http.StatusOK, products)
+	return ctx.JSON(http.StatusOK, response)
 }
 
 // filterByMarkets defines the logic of the handling the filter-by-markets requests.

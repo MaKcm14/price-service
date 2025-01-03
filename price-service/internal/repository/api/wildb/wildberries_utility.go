@@ -12,10 +12,27 @@ import (
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
 )
 
+// URL paths' consts.
 const (
 	wildberriesGeoString   = "appType=1&curr=rub&dest=-1257786&hide_dtype=10&lang=ru"
 	searchAPIPath          = "https://search.wb.ru/exactmatch/ru/common/v9/search"
 	wildberriesOpenAPIPath = "https://www.wildberries.ru/catalog/0/search.aspx"
+)
+
+// URL query params' consts.
+const (
+	priceRangeID = "priceU"
+	sortID       = "sort"
+	searchID     = "search"
+	queryID      = "query"
+	pageID       = "page"
+)
+
+// parsing's consts.
+const (
+	mainProductsTagName       = "article"
+	imageClassName            = "j-thumbnail"
+	productContainerClassName = "product-card-list"
 )
 
 type (
@@ -44,38 +61,38 @@ type (
 )
 
 // getOpenApiPath returns the correct URL's path for wildberries open API.
-// It uses with domain "www.wildberries.ru".
+// It uses with the origin "https://www.wildberries.ru".
 func (v wildberriesViewer) getOpenApiPath(request dto.ProductRequest, filters []string) string {
 	var path string
 	filtersURL := v.converter.GetFilters(filters)
 
-	path += fmt.Sprintf("page=%d", request.Sample)
-	path += "&sort=" + filtersURL["sort"]
+	path += fmt.Sprintf("%s=%d", pageID, request.Sample)
+	path += fmt.Sprintf("&%s=%s", sortID, filtersURL[sortID])
 
-	if priceRange, flagExist := filtersURL["priceU"]; flagExist {
-		path += "&priceU=" + priceRange
+	if priceRange, flagExist := filtersURL[priceRangeID]; flagExist {
+		path += fmt.Sprintf("&%s=%s", priceRangeID, priceRange)
 	}
 
-	path += "&search=" + strings.Join(strings.Split(request.Query, " "), "+")
+	path += fmt.Sprintf("&%s=%s", searchID, strings.Join(strings.Split(request.Query, " "), "+"))
 
 	return path
 }
 
 // getHiddenApiPath returns the correct URL's path for wildberries hidden API.
-// It uses with domain "search.wb.ru".
+// It uses with the origin "https://search.wb.ru".
 func (v wildberriesViewer) getHiddenApiPath(request dto.ProductRequest, filters []string) string {
 	var path string
 	filtersURL := v.converter.GetFilters(filters)
 
-	path += fmt.Sprintf("page=%d", request.Sample)
+	path += fmt.Sprintf("%s=%d", pageID, request.Sample)
 
-	if priceRange, flagExist := filtersURL["priceU"]; flagExist {
-		path += "&priceU=" + priceRange
+	if priceRange, flagExist := filtersURL[priceRangeID]; flagExist {
+		path += fmt.Sprintf("&%s=%s", priceRangeID, priceRange)
 	}
 
-	path += "&query=" + url.QueryEscape(request.Query)
+	path += fmt.Sprintf("&%s=%s", queryID, url.QueryEscape(request.Query))
 
-	path += "&resultset=catalog&sort=" + filtersURL["sort"]
+	path += fmt.Sprintf("&resultset=catalog&%s=%s", sortID, filtersURL["sort"])
 	path += "&spp=30&suppressSpellcheck=false"
 
 	return path
@@ -106,15 +123,15 @@ func (p wildberriesViewer) getOpenApiURL(request dto.ProductRequest, filters []s
 func (p wildberriesParser) parseImageLinks(html string) []string {
 	const serviceType = "wildberries.service.image-links-getter"
 
-	if !strings.Contains(html, "article") {
+	if !strings.Contains(html, mainProductsTagName) {
 		p.logger.Warn(fmt.Sprintf("error of the %v: %v: images couldn't be load", serviceType, api.ErrServiceResponse))
 		return nil
 	}
 
 	var imageLinks = make([]string, 0, 100)
 
-	for _, tag := range soup.HTMLParse(html).FindAll("article") {
-		link := tag.Find("img", "class", "j-thumbnail")
+	for _, tag := range soup.HTMLParse(html).FindAll(mainProductsTagName) {
+		link := tag.Find("img", "class", imageClassName)
 		imageLinks = append(imageLinks, link.Attrs()["src"])
 	}
 

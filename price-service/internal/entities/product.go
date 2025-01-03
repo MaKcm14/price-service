@@ -1,5 +1,11 @@
 package entities
 
+type Currency string
+
+const (
+	RUB Currency = "rub"
+)
+
 type ProductLink struct {
 	URL       string `json:"url"`
 	ImageLink string `json:"image_link"`
@@ -18,6 +24,7 @@ type ProductSample struct {
 	Products   []Product `json:"products"`
 	SampleLink string    `json:"main_products_sample"`
 	Market     string    `json:"market"`
+	Currency   Currency  `json:"currency"`
 }
 
 func NewProductSample(products []Product, sampleLink string, sampleMarket Market) ProductSample {
@@ -35,5 +42,6 @@ func NewProductSample(products []Product, sampleLink string, sampleMarket Market
 		Products:   products,
 		SampleLink: sampleLink,
 		Market:     market,
+		Currency:   RUB,
 	}
 }
