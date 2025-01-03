@@ -7,11 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const (
-	Wildberries string = "Wildberries"
-	MegaMarket  string = "MegaMarket"
-)
-
 // ChromePull supports the safe opening and closing the connection with the instances of the browser.
 type ChromePull struct {
 	cancels []context.CancelFunc

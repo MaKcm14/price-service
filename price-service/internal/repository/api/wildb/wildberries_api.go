@@ -70,7 +70,7 @@ func (w WildberriesAPI) getHtmlPage(url string, request dto.ProductRequest) (str
 
 	if err != nil {
 		w.logger.Error(fmt.Sprintf("error of the %s: %v: %v", serviceType, api.ErrChromeDriver, err))
-		return "", fmt.Errorf("%v: %v", api.ErrChromeDriver, err)
+		return "", fmt.Errorf("%w: %v", api.ErrChromeDriver, err)
 	}
 
 	return html, nil
@@ -88,7 +88,7 @@ func (w WildberriesAPI) readResponseBody(source io.Reader) ([]byte, error) {
 			respBody = append(respBody, buffer[:n]...)
 		} else if err != nil && err != io.EOF {
 			w.logger.Warn(fmt.Sprintf("error of the %v: %v: %v", serviceType, api.ErrBufferReading, err))
-			return nil, fmt.Errorf("%v: %v", api.ErrBufferReading, err)
+			return nil, fmt.Errorf("%w: %v", api.ErrBufferReading, err)
 		} else if err == io.EOF {
 			break
 		}
@@ -121,7 +121,7 @@ func (w WildberriesAPI) getProductSample(url string) ([]wildberriesProduct, erro
 
 		if err != nil || resp.StatusCode > 299 {
 			w.logger.Warn(fmt.Sprintf("error of the %v: %v: %v", serviceType, api.ErrServiceResponse, err))
-			return nil, fmt.Errorf("%v: %v", api.ErrServiceResponse, err)
+			return nil, fmt.Errorf("%w: %v", api.ErrServiceResponse, err)
 		}
 		defer resp.Body.Close()
 
@@ -150,7 +150,7 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request dto.ProductRequest
 
 	if api.IsConnectionClosed(ctx) {
 		w.logger.Warn(fmt.Sprintf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed))
-		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed)
+		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %w", serviceType, api.ErrConnectionClosed)
 	}
 
 	sample, err := w.getProductSample(w.view.getHiddenApiURL(request, filters))
@@ -161,7 +161,7 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request dto.ProductRequest
 
 	if api.IsConnectionClosed(ctx) {
 		w.logger.Warn(fmt.Sprintf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed))
-		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed)
+		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %w", serviceType, api.ErrConnectionClosed)
 	}
 
 	htmlSourceLink := w.view.getOpenApiURL(request, filters)
@@ -177,10 +177,6 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request dto.ProductRequest
 
 		imageLinks = w.parser.parseImageLinks(html)
 	}
-
-	///DEBUG:
-	fmt.Println(len(sample), len(imageLinks))
-	///TODO: delete
 
 	for i, j := 0, 0; i != len(sample); i++ {
 		var image string

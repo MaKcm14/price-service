@@ -3,9 +3,11 @@ package chttp
 import "errors"
 
 var (
+	ErrRequest        = errors.New("the server couldn't handle the current request")
 	ErrRequestInfo    = errors.New("the wrong request data was got")
 	ErrRequestPath    = errors.New("try to request to unknown resource")
 	ErrServerHandling = errors.New("the server couldn't handle the response")
+	ErrExternalServer = errors.New("the external server couldn't handle the response")
 )
 
 // ResponseErr is the wrapper for the errors' response.

@@ -1,14 +1,18 @@
 package chttp
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
-	filter "github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
+	"github.com/MaKcm14/best-price-service/price-service/internal/services"
+	"github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
 )
 
 // Controller handles the clients' requests.
@@ -34,7 +38,7 @@ func (с Controller) Run(socket string) {
 
 	с.logger.Info("configuring and starting the http-server begun")
 
-	с.configPaths()
+	с.configController()
 	err := с.contr.Start(socket)
 
 	if err != nil {
@@ -44,20 +48,47 @@ func (с Controller) Run(socket string) {
 	}
 }
 
+func (c *Controller) configController() {
+	c.configMW()
+	c.configPaths()
+}
+
 func (c *Controller) configPaths() {
 	c.contr.GET("/products/filter/price/price-range", c.handlePriceRangeRequest)
 	c.contr.GET("/products/filter/price/best-price", c.handleBestPriceRequest)
 	c.contr.GET("/products/filter/price/exact-price", c.handleExactPriceRequest)
 	c.contr.GET("/products/filter/markets", c.handleMarketsRequest)
+}
 
-	c.contr.HTTPErrorHandler = func(err error, cont echo.Context) {
-		if err, flagCheck := err.(*echo.HTTPError); flagCheck {
-			if err.Code == http.StatusNotFound {
+func (c *Controller) configMW() {
+	c.contr.Use(middleware.BodyLimit("600K"))
+	c.contr.Use(middleware.Gzip())
+	c.contr.Use(middleware.CORS())
+
+	c.contr.HTTPErrorHandler = func(err error, ctx echo.Context) {
+		if errHttp, flagCheck := err.(*echo.HTTPError); flagCheck {
+			if errHttp.Code == http.StatusNotFound {
 				c.logger.Warn("the wrong request path was got")
-				cont.JSON(http.StatusNotFound, ResponseErr{ErrRequestPath.Error()})
+				ctx.JSON(http.StatusNotFound, ResponseErr{ErrRequestPath.Error()})
+			} else {
+				c.logger.Warn(fmt.Sprintf("%v", err))
+				ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequest.Error()})
 			}
+			return
+		}
+
+		if err != nil {
+			c.logger.Warn(fmt.Sprintf("%v", err))
+			ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 		}
 	}
+}
+
+// setBasicHeaders sets the headers that are common for every successfull response.
+func (c *Controller) setBasicHeaders(ctx echo.Context, buf []byte) {
+	ctx.Response().Header().Add("Connection", "keep-alive")
+	ctx.Response().Header().Add("Content-Language", "en, ru")
+	ctx.Response().Header().Add("Content-Length", fmt.Sprintf("%d", len(buf)+1))
 }
 
 // filterByPriceUpDown defines the logic of the handling the filter-by-price-down-up requests.
@@ -89,10 +120,21 @@ func (c *Controller) handlePriceRangeRequest(ctx echo.Context) error {
 
 	if err != nil {
 		c.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+
+		if errors.Is(err, services.ErrGettingProducts) {
+			return ctx.JSON(http.StatusBadGateway, ResponseErr{ErrExternalServer.Error()})
+		}
+
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	ctx.Response().Header().Add("Cache-Control", "public,max-age=43200")
+	response := NewProductResponse(products)
+	buf, _ := json.Marshal(response)
+
+	c.setBasicHeaders(ctx, buf)
+
+	ctx.Response().Header().Add("Content-Type", "application/json; charset=utf-8")
+	ctx.Response().Header().Add("Cache-Control", "public, max-age=43200")
 
 	return ctx.JSON(http.StatusOK, products)
 }
@@ -118,10 +160,21 @@ func (c *Controller) handleBestPriceRequest(ctx echo.Context) error {
 
 	if err != nil {
 		c.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+
+		if errors.Is(err, services.ErrGettingProducts) {
+			return ctx.JSON(http.StatusBadGateway, ResponseErr{ErrExternalServer.Error()})
+		}
+
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	ctx.Response().Header().Add("Cache-Control", "public,max-age=43200")
+	response := NewProductResponse(products)
+	buf, _ := json.Marshal(response)
+
+	c.setBasicHeaders(ctx, buf)
+
+	ctx.Response().Header().Add("Content-Type", "application/json; charset=utf-8")
+	ctx.Response().Header().Add("Cache-Control", "public, max-age=43200")
 
 	return ctx.JSON(http.StatusOK, products)
 }
@@ -155,10 +208,20 @@ func (c *Controller) handleExactPriceRequest(ctx echo.Context) error {
 
 	if err != nil {
 		c.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+
+		if errors.Is(err, services.ErrGettingProducts) {
+			return ctx.JSON(http.StatusBadGateway, ResponseErr{ErrExternalServer.Error()})
+		}
+
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
+	response := NewProductResponse(products)
+	buf, _ := json.Marshal(response)
 
-	ctx.Response().Header().Add("Cache-Control", "public,max-age=43200")
+	c.setBasicHeaders(ctx, buf)
+
+	ctx.Response().Header().Add("Content-Type", "application/json; charset=utf-8")
+	ctx.Response().Header().Add("Cache-Control", "public, max-age=43200")
 
 	return ctx.JSON(http.StatusOK, products)
 }
@@ -185,10 +248,21 @@ func (c *Controller) handleMarketsRequest(ctx echo.Context) error {
 
 	if err != nil {
 		c.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, ErrServerHandling))
+
+		if errors.Is(err, services.ErrGettingProducts) {
+			return ctx.JSON(http.StatusBadGateway, ResponseErr{ErrExternalServer.Error()})
+		}
+
 		return ctx.JSON(http.StatusInternalServerError, ResponseErr{ErrServerHandling.Error()})
 	}
 
-	ctx.Response().Header().Add("Cache-Control", "public,max-age=43200")
+	response := NewProductResponse(products)
+	buf, _ := json.Marshal(response)
 
-	return ctx.JSON(http.StatusOK, products)
+	c.setBasicHeaders(ctx, buf)
+
+	ctx.Response().Header().Add("Content-Type", "application/json; charset=utf-8")
+	ctx.Response().Header().Add("Cache-Control", "public, max-age=43200")
+
+	return ctx.JSON(http.StatusOK, response)
 }
