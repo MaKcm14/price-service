@@ -103,6 +103,7 @@ func (p megaMarketParser) parseProductSuppliers(html string) []string {
 	return nil
 }
 
+// getPrice returns the int price view of the parsed product's price.
 func (p megaMarketParser) getPrice(respPrice string) int {
 	price := ""
 
@@ -117,7 +118,7 @@ func (p megaMarketParser) getPrice(respPrice string) int {
 	return res
 }
 
-// TODO: divide it.
+// TODO: divide it. This is a test function that can be deleted in the future versions.
 func (p megaMarketParser) parseProducts(html string) []entities.Product {
 	var products = make([]entities.Product, 0, 50)
 
