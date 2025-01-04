@@ -9,8 +9,6 @@ import (
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
-	"github.com/chromedp/chromedp"
-	"github.com/chromedp/chromedp/kb"
 	"github.com/labstack/echo/v4"
 )
 
@@ -33,52 +31,9 @@ func NewMegaMarketAPI(ctx context.Context, log *slog.Logger, loadCoeff int) Mega
 	}
 }
 
-// getHtmlPage gets the html page from the open API url.
-func (m MegaMarketAPI) getHtmlPage(url string, request dto.ProductRequest) (string, error) {
-	const serviceType = "megamarket.service.html-page-getter"
-
-	var err error
-	var html string
-
-	if request.Amount == "min" {
-		_, err = chromedp.RunResponse(m.ctx,
-			chromedp.Navigate(url),
-			chromedp.Sleep(3000*time.Millisecond+m.loadCoeff),
-			chromedp.Sleep(3000*time.Millisecond+m.loadCoeff),
-			chromedp.Sleep(3000*time.Millisecond+m.loadCoeff),
-			chromedp.InnerHTML(fmt.Sprintf("[class='%s']", productContainerClassName), &html),
-		)
-	} else if request.Amount == "max" {
-		_, err = chromedp.RunResponse(m.ctx,
-			chromedp.Navigate(url),
-			chromedp.Sleep(3000*time.Millisecond+m.loadCoeff),
-			chromedp.KeyEvent(kb.End),
-			chromedp.Sleep(1000*time.Millisecond+m.loadCoeff),
-			chromedp.KeyEvent(kb.End),
-			chromedp.Sleep(1000*time.Millisecond+m.loadCoeff),
-			chromedp.KeyEvent(kb.End),
-			chromedp.Sleep(1000*time.Millisecond+m.loadCoeff),
-			chromedp.KeyEvent(kb.End),
-			chromedp.Sleep(4000*time.Millisecond+m.loadCoeff),
-			chromedp.InnerHTML(fmt.Sprintf("[class='%s']", productContainerClassName), &html),
-		)
-	}
-
-	if err != nil {
-		m.logger.Error(fmt.Sprintf("error of the %s: %v: %v", serviceType, api.ErrChromeDriver, err))
-		return "", fmt.Errorf("%w: %v", api.ErrChromeDriver, err)
-	}
-
-	return html, nil
-}
-
 func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest, filters ...string) (entities.ProductSample, error) {
 	//DEBUG:
-	html, _ := m.getHtmlPage(m.view.getOpenApiURL(request, filters), request)
-
-	fmt.Println("parseProducts begun")
-	m.parser.parseProducts(html)
-	fmt.Println("parseProducts finished")
+	fmt.Println(m.view.getOpenApiURL(request, filters))
 
 	return entities.ProductSample{}, api.ErrBufferReading
 	///TODO: check and delete

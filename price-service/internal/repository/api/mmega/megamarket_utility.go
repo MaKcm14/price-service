@@ -4,13 +4,9 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
-	"strconv"
-	"strings"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
-	"github.com/anaskhan96/soup"
 )
 
 // URL paths' consts.
@@ -26,11 +22,6 @@ const (
 const (
 	priceRangeID = "filters"
 	sortID       = "sort"
-)
-
-// parsing's consts.
-const (
-	productContainerClassName = "catalog-items-list__container"
 )
 
 type (
@@ -91,72 +82,4 @@ func (v megaMarketViewer) getSortParamView(sort string) string {
 		return "5"
 	}
 	return "0"
-}
-
-// parseProductPrices parses the current html page for getting the product prices.
-func (p megaMarketParser) parseProductPrices(html string) []entities.Price {
-	return nil
-}
-
-// parseProductSuppliers parses the current html page for getting the product suppliers.
-func (p megaMarketParser) parseProductSuppliers(html string) []string {
-	return nil
-}
-
-// getPrice returns the int price view of the parsed product's price.
-func (p megaMarketParser) getPrice(respPrice string) int {
-	price := ""
-
-	for _, elem := range respPrice {
-		if elem >= 48 && elem <= 57 {
-			price += string(elem)
-		}
-	}
-
-	res, _ := strconv.Atoi(price)
-
-	return res
-}
-
-// TODO: divide it. This is a test function that can be deleted in the future versions.
-func (p megaMarketParser) parseProducts(html string) []entities.Product {
-	var products = make([]entities.Product, 0, 50)
-
-	for _, tag := range soup.HTMLParse(html).FindAll("a", "data-test", "product-image-link") {
-		link := tag.Find("img")
-
-		products = append(products, entities.Product{
-			Name: link.Attrs()["alt"],
-			Links: entities.ProductLink{
-				URL:       megaMarketOrigin + strings.Join(strings.Split(tag.Attrs()["href"], " "), "%20"),
-				ImageLink: link.Attrs()["src"],
-			},
-		})
-
-		fmt.Println(products[len(products)-1])
-	}
-
-	discPrices := make([]int, 0, len(products))
-	priceTags := soup.HTMLParse(html).FindAll("div", "class", "item-price")
-	for i := 0; i != len(priceTags); i++ {
-		var tag = priceTags[i]
-
-		tag = tag.Find("div", "data-test", "product-price")
-
-		price := p.getPrice(tag.Text())
-
-		discPrices = append(discPrices, price)
-		fmt.Println(price)
-	}
-
-	basePrices := make([]int, 0, len(products))
-	for _, tag := range soup.HTMLParse(html).FindAll("div", "class", "item-price-discount__number") {
-		if tag.Pointer != nil {
-			price := p.getPrice(tag.Text())
-			basePrices = append(basePrices, price)
-			fmt.Println(price)
-		}
-	}
-
-	return products
 }
