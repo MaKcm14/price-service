@@ -60,12 +60,12 @@ class MMProductsGetter:
 
         try:
             if not body["success"]:
-                raise ValueError("error of the service response", 500)
+                raise Exception("error of the service response")
 
         except Exception:
             if body["code"] == 7:
-                raise Exception("the limit of the service is finished: try again later", 502)
+                raise OverflowError("the limit of the service is finished: try again later")
 
-            raise Exception("error of getting and parsed the response", 500)
+            raise Exception("error of getting and parsing the response")
 
         return resp.text
