@@ -1,9 +1,12 @@
 package mmega
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"time"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
@@ -31,33 +34,55 @@ func NewMegaMarketAPI(ctx context.Context, log *slog.Logger, loadCoeff int) Mega
 	}
 }
 
+// getProducts is the main function of getting the products from the MegaMarket-API calls.
 func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest, filters ...string) (entities.ProductSample, error) {
-	//DEBUG:
-	fmt.Println(m.view.getOpenApiURL(request, filters))
+	const serviceType = "megamarket.service.main-products-getter"
+
+	byPassRequest := newByPassServiceRequest(
+		request.Query,
+		fmt.Sprint(request.Sample),
+		m.view.getSortParamURLView(string(request.Sort)),
+		m.view.converter.GetFilters(filters),
+	)
+	requestBody, _ := json.Marshal(byPassRequest)
+
+	if api.IsConnectionClosed(ctx) {
+		m.logger.Warn(fmt.Sprintf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed))
+		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %w", serviceType, api.ErrConnectionClosed)
+	}
+
+	resp, err := http.Post("http://localhost:8081/mmarket", "application/json", bytes.NewBuffer(requestBody))
+
+	if err != nil || resp.StatusCode > 299 {
+		m.logger.Warn(fmt.Sprintf("error of the %s: %v", serviceType, err))
+		return entities.ProductSample{}, fmt.Errorf("error of the %s: %w", serviceType, api.ErrByPassServiceResponse)
+	}
+	defer resp.Body.Close()
+
+	//TODO: read and parse the correct response
 
 	return entities.ProductSample{}, api.ErrBufferReading
-	///TODO: check and delete
 }
 
 // GetProducts gets the products without any filters.
 func (m MegaMarketAPI) GetProducts(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
-	return m.getProducts(ctx, request, sortID, m.view.getSortParamView(string(request.Sort)))
+	return m.getProducts(ctx, request, sortID, m.view.getSortParamURLView(string(request.Sort)))
 }
 
 // GetProductsByPriceRange gets the products with filter by price range.
 func (m MegaMarketAPI) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error) {
-	return m.getProducts(ctx, request, sortID, m.view.getSortParamView(string(request.Sort)),
-		priceRangeID, m.view.getPriceRangeView(priceDown, priceUp))
+	return m.getProducts(ctx, request, sortID, m.view.getSortParamURLView(string(request.Sort)),
+		priceRangeID, fmt.Sprintf("%d %d", priceDown, priceUp))
 }
 
 // GetProductsByExactPrice gets the products with filter by price
 // in range [exactPrice, exactPrice + 10% off exactPrice].
 func (m MegaMarketAPI) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest, exactPrice int) (entities.ProductSample, error) {
-	return m.getProducts(ctx, request, sortID, m.view.getSortParamView(string(request.Sort)),
-		priceRangeID, m.view.getPriceRangeView(exactPrice, int(float32(exactPrice)*1.1)))
+	return m.getProducts(ctx, request, sortID, m.view.getSortParamURLView(string(request.Sort)),
+		priceRangeID, fmt.Sprintf("%d %d", exactPrice, int(float32(exactPrice)*1.1)))
 }
 
 // GetProductsByBestPrice gets the products with filter by min price.
 func (m MegaMarketAPI) GetProductsWithBestPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
-	return m.getProducts(ctx, request, sortID, m.view.getSortParamView(string(request.Sort)))
+	return m.getProducts(ctx, request, sortID, m.view.getSortParamURLView(string(request.Sort)))
 }

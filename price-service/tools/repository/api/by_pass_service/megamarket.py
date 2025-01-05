@@ -85,10 +85,10 @@ class MegaMarketAPI:
 
     def __init__(self, body):
         self.__query: str = body["query"]
-        self.__page: int = body["sample"]
-        self.__sort: int = body["sort"]
+        self.__page: int = int(body["sample"])
+        self.__sort: int = int(body["sort"])
         self.__show_not_available: bool = body["show_not_available"]
-        self.__flag_price_filter: bool = body["price_filter"]["is_price_filter_set"]
+        self.__flag_price_filter: bool = body["is_price_filter_set"]
         
         if self.__flag_price_filter:
             self.__price_range: tuple = (

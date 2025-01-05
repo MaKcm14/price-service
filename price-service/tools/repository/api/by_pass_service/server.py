@@ -1,18 +1,18 @@
 from flask import Flask, request
-from mm_getter import MegaMarketAPI
+from megamarket import MegaMarketAPI
 
 app = Flask(__name__)
 
 # POST-handle: client sends the next JSON-object:
 # {
 #   "query": "query_text",
-#   "sample": sample_num,
-#   "sort": sort_num,
+#   "sample": "sample_num",
+#   "sort": "sort_num",
 #   "show_not_available":flag,
+#   "is_price_filter_set": flag_filter_set
 #   "price_filter": {
 #       "price_down": "low_price_border",
 #       "price_up": "high_price_border",
-#       "is_price_filter_set": flag_filter_set
 #   }
 # }
 # which defines the products' request query.

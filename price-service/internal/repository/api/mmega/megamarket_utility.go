@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"strings"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
@@ -13,9 +14,7 @@ import (
 const (
 	megaMarketOrigin      = "https://megamarket.ru"
 	megaMarketOpenApiPath = "/catalog/page-"
-
-	//TODO: realocate it to the .env:
-	priceRangeKey = "88C83F68482F447C9F4E401955196697"
+	priceRangeKey         = "88C83F68482F447C9F4E401955196697"
 )
 
 // URL query params' consts.
@@ -46,17 +45,19 @@ func (v megaMarketViewer) getOpenApiURL(request dto.ProductRequest, filter []str
 	path += fmt.Sprintf("#?%s=%s", sortID, filters[sortID])
 
 	if priceRange, flagExist := filters[priceRangeID]; flagExist {
-		path += fmt.Sprintf("&%s=%s", priceRangeID, priceRange)
+		path += fmt.Sprintf("&%s=%s", priceRangeID, v.getPriceRangeURLView(priceRange))
 	}
 
 	return path
 }
 
-func (v megaMarketViewer) getPriceRangeView(priceDown int, priceUp int) string {
-	priceRange := fmt.Sprintf("{\"%s\":{\"min\":%d,\"max\":%d}}", priceRangeKey, priceDown, priceUp)
+// getPriceRangeView returns the correct URL-view of the price-range filter.
+func (v megaMarketViewer) getPriceRangeURLView(priceRange string) string {
+	prices := strings.Split(priceRange, " ")
+	priceRangeObj := fmt.Sprintf("{\"%s\":{\"min\":%s,\"max\":%s}}", priceRangeKey, prices[0], prices[1])
 	urlPriceRange := ""
 
-	for _, elem := range priceRange {
+	for _, elem := range priceRangeObj {
 		if string(elem) == "{" {
 			urlPriceRange += "%7B"
 		} else if string(elem) == "}" {
@@ -73,7 +74,8 @@ func (v megaMarketViewer) getPriceRangeView(priceDown int, priceUp int) string {
 	return urlPriceRange
 }
 
-func (v megaMarketViewer) getSortParamView(sort string) string {
+// getSortParamView returns the mapped value of the sort parameter specified for megamarket-service.
+func (v megaMarketViewer) getSortParamURLView(sort string) string {
 	if sort == "priceup" {
 		return "1"
 	} else if sort == "pricedown" {
