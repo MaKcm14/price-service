@@ -1,16 +1,27 @@
 from flask import Flask, request
-from mm_getter import MMProductsGetter
+from mm_getter import MegaMarketAPI
 
 app = Flask(__name__)
 
-# POST-handle: client sends the {"query":"query_text"} 
+# POST-handle: client sends the next JSON-object:
+# {
+#   "query": "query_text",
+#   "sample": sample_num,
+#   "sort": sort_num,
+#   "show_not_available":flag,
+#   "price_filter": {
+#       "price_down": "low_price_border",
+#       "price_up": "high_price_border",
+#       "is_price_filter_set": flag_filter_set
+#   }
+# }
 # which defines the products' request query.
-# Response is the JSON-object of the products response from megamarket service.
+# Response is the JSON-object of the response from megamarket service.
 @app.route('/mmarket', methods=['POST']) 
 def get_mmarket_products():
     body = request.get_json()
     try:
-        getter = MMProductsGetter(body["query"])
+        getter = MegaMarketAPI(body)
         return getter.get_products_json(), 200
 
     except AttributeError | TypeError:

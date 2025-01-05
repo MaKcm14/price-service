@@ -3,6 +3,7 @@ from curl_cffi import requests
 
 MM_ORIGIN: str = "https://megamarket.ru"
 PRODUCTS_PATH: str = "/api/mobile/v1/catalogService/catalog/search"
+FILTER_ID = "88C83F68482F447C9F4E401955196697"
 AUTH: dict = {
     "locationId":"50",
     "appPlatform":"WEB",
@@ -76,15 +77,22 @@ AUTH: dict = {
     "os":"UNKNOWN_OS"
 }
 
-# TODO: finish filters
-class MMProductsGetter:
+class MegaMarketAPI:
     __err_response_struct: str = "mmarket: error of the response's structure"
     __err_service_limit: str = "mmarket: the limit of the service is over: try again later"
     __err_service_interaction: str = "mmarket: error of the service interaction"
 
 
-    def __init__(self, orig_query):
-        self.__query: str = orig_query
+    def __init__(self, body):
+        self.__query: str = body["query"]
+        self.__page: int = body["sample"]
+        self.__sort: int = body["sort"]
+        self.__show_not_available: bool = body["show_not_available"]
+        self.__flag_price_filter: bool = body["price_filter"]["is_price_filter_set"]
+        
+        if self.__flag_price_filter:
+            self.__price_range: tuple = (
+                body["price_filter"]["price_down"], body["price_filter"]["price_up"])
 
 
     def __send_request(self, json_data):
@@ -111,20 +119,31 @@ class MMProductsGetter:
             "requestVersion":12,
             "merchant":{},
             "limit":44,
-            "offset":0,
+            "offset": (self.__page - 1) * 44,
             "isMultiCategorySearch":False,
             "searchByOriginalQuery":False,
             "selectedSuggestParams":[],
             "expandedFiltersIds":[],
-            "sorting":0,
+            "sorting":self.__sort,
             "ageMore18":None,
-            "showNotAvailable":False,
-            #"selectedAssumedCollectionId":"",
+            "showNotAvailable":self.__show_not_available,
             "selectedFilters":[],
-            #"collectionId":"",
             "searchText":self.__query,
             "auth": AUTH
         }
+
+        if self.__flag_price_filter:
+            json_data["selectedFilters"] = [{
+                "filterId": FILTER_ID,
+                "type": 1,
+                "value": self.__price_range[0]
+            },
+            {
+                "filterId": FILTER_ID,
+                "type": 2,
+                "value": self.__price_range[1]
+            },
+            ]
 
         resp = self.__send_request(json_data)
         body = json.loads(resp.text)
