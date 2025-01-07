@@ -38,6 +38,8 @@ func NewMegaMarketAPI(ctx context.Context, log *slog.Logger, loadCoeff int) Mega
 func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest, filters ...string) (entities.ProductSample, error) {
 	const serviceType = "megamarket.service.main-products-getter"
 
+	products := make([]entities.Product, 0, 50)
+
 	byPassRequest := newByPassServiceRequest(
 		request.Query,
 		fmt.Sprint(request.Sample),
@@ -59,9 +61,18 @@ func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest,
 	}
 	defer resp.Body.Close()
 
-	//TODO: read and parse the correct response
+	jsonProducts, err := api.ReadResponseBody(resp.Body, m.logger, serviceType)
 
-	return entities.ProductSample{}, api.ErrBufferReading
+	if err != nil {
+		return entities.ProductSample{}, fmt.Errorf("error of the %v: error of the reading response body: %v",
+			serviceType, err)
+	}
+
+	_ = jsonProducts
+
+	// parse the products to the []entities.Product
+
+	return entities.NewProductSample(products, m.view.getOpenApiURL(request, filters), entities.MegaMarket), nil
 }
 
 // GetProducts gets the products without any filters.

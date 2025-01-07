@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"time"
@@ -76,27 +75,6 @@ func (w WildberriesAPI) getHtmlPage(url string, request dto.ProductRequest) (str
 	return html, nil
 }
 
-func (w WildberriesAPI) readResponseBody(source io.Reader) ([]byte, error) {
-	const serviceType = "wildberries.service.read-response-body"
-
-	respBody := make([]byte, 0, 100000)
-	for {
-		buffer := make([]byte, 10000)
-		n, err := source.Read(buffer)
-
-		if n != 0 && (err == nil || err == io.EOF) {
-			respBody = append(respBody, buffer[:n]...)
-		} else if err != nil && err != io.EOF {
-			w.logger.Warn(fmt.Sprintf("error of the %v: %v: %v", serviceType, api.ErrBufferReading, err))
-			return nil, fmt.Errorf("%w: %v", api.ErrBufferReading, err)
-		} else if err == io.EOF {
-			break
-		}
-	}
-
-	return respBody, nil
-}
-
 // getProductsSample gets the json-view structs of the products connected with the current "sample".
 func (w WildberriesAPI) getProductSample(url string) ([]wildberriesProduct, error) {
 	const serviceType = "wildberries.service.search.wb.ru-products-getter"
@@ -126,10 +104,11 @@ func (w WildberriesAPI) getProductSample(url string) ([]wildberriesProduct, erro
 		}
 		defer resp.Body.Close()
 
-		respBody, err := w.readResponseBody(resp.Body)
+		respBody, err := api.ReadResponseBody(resp.Body, w.logger, serviceType)
 
 		if err != nil {
-			return nil, fmt.Errorf("error of the %v: %v", serviceType, err)
+			return nil, fmt.Errorf("error of the %v: error of the reading response body: %v",
+				serviceType, err)
 		}
 
 		err = json.Unmarshal(respBody, &sample)
