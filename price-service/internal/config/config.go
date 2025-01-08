@@ -42,7 +42,7 @@ func Socket(appSet *Settings, log *slog.Logger) error {
 
 func NewSettings(log *slog.Logger, opts ...SettingOpt) (Settings, error) {
 	appSet := Settings{}
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load("../.env")
 
 	if err != nil {
 		envErr := fmt.Errorf("error while loading the .env file (check it and try again): %v", err)

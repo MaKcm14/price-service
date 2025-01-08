@@ -55,8 +55,13 @@ func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest,
 
 	resp, err := http.Post("http://localhost:8081/mmarket", "application/json", bytes.NewBuffer(requestBody))
 
-	if err != nil || resp.StatusCode > 299 {
+	if err != nil {
 		m.logger.Warn(fmt.Sprintf("error of the %s: %v", serviceType, err))
+		return entities.ProductSample{}, fmt.Errorf("error of the %s: %w", serviceType, api.ErrByPassServiceResponse)
+	} else if resp.StatusCode > 299 {
+		errDescr := make(map[string]string)
+		json.Marshal(errDescr)
+		m.logger.Warn(fmt.Sprintf("error of the %s: %s", serviceType, errDescr["error"]))
 		return entities.ProductSample{}, fmt.Errorf("error of the %s: %w", serviceType, api.ErrByPassServiceResponse)
 	}
 	defer resp.Body.Close()
