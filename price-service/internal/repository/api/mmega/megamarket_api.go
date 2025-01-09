@@ -38,6 +38,12 @@ func NewMegaMarketAPI(ctx context.Context, log *slog.Logger, loadCoeff int) Mega
 func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest, filters ...string) (entities.ProductSample, error) {
 	const serviceType = "megamarket.service.main-products-getter"
 
+	respProds := struct {
+		Items []megaMarketProduct `json:"items"`
+	}{
+		Items: make([]megaMarketProduct, 0, 100),
+	}
+
 	products := make([]entities.Product, 0, 50)
 
 	byPassRequest := newByPassServiceRequest(
@@ -73,9 +79,25 @@ func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest,
 			serviceType, err)
 	}
 
-	_ = jsonProducts
+	err = json.Unmarshal(jsonProducts, &respProds)
 
-	// parse the products to the []entities.Product
+	if err != nil {
+		m.logger.Warn(fmt.Sprintf("error of %v: %v: %v", serviceType, api.ErrJSONResponseParsing, err))
+		return entities.ProductSample{}, fmt.Errorf("error of the %v: %w: %v", serviceType, api.ErrJSONResponseParsing, err)
+	}
+
+	for _, product := range respProds.Items {
+		products = append(products, entities.Product{
+			Name:  product.Goods.Title,
+			Brand: product.Goods.Brand,
+			Price: entities.NewPrice(product.Price, product.FinalPrice),
+			Links: entities.ProductLink{
+				URL:       product.Goods.URL,
+				ImageLink: product.Goods.TitleImageLink,
+			},
+			Supplier: product.Offer.MerchantName,
+		})
+	}
 
 	return entities.NewProductSample(products, m.view.getOpenApiURL(request, filters), entities.MegaMarket), nil
 }

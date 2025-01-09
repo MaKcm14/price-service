@@ -24,6 +24,24 @@ const (
 )
 
 type (
+	megaMarketProductOffer struct {
+		MerchantName string `json:"merchantName"`
+	}
+
+	megaMarketProductDecription struct {
+		Title          string `json:"title"`
+		TitleImageLink string `json:"titleImage"`
+		URL            string `json:"webUrl"`
+		Brand          string `json:"brand"`
+	}
+
+	megaMarketProduct struct {
+		Goods      megaMarketProductDecription `json:"goods"`
+		Price      int                         `json:"price"`
+		FinalPrice int                         `json:"finalPrice"`
+		Offer      megaMarketProductOffer      `json:"favoriteOffer"`
+	}
+
 	// megaMarketViewer defines the specific view of the filters and url for MegaMarket.
 	megaMarketViewer struct {
 		converter api.URLConverter

@@ -17,7 +17,7 @@ app = Flask(__name__)
 # }
 # which defines the products' request query.
 # Response is the JSON-object of the response from megamarket service.
-@app.route('/mmarket', methods=['POST']) 
+@app.route('/mmarket', methods=['POST'])
 def get_mmarket_products():
     body = request.get_json()
     try:
