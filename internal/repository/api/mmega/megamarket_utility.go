@@ -23,6 +23,11 @@ const (
 	sortID       = "sort"
 )
 
+const (
+	// minValue is the min amount of products that can be got from the service in one sample.
+	minValue = 15
+)
+
 type (
 	megaMarketProductOffer struct {
 		MerchantName string `json:"merchantName"`
@@ -69,7 +74,7 @@ func (v megaMarketViewer) getOpenApiURL(request dto.ProductRequest, filter []str
 	return path
 }
 
-// getPriceRangeView returns the correct URL-view of the price-range filter.
+// getPriceRangeURLView returns the correct URL-view of the price-range filter.
 func (v megaMarketViewer) getPriceRangeURLView(priceRange string) string {
 	prices := strings.Split(priceRange, " ")
 	priceRangeObj := fmt.Sprintf("{\"%s\":{\"min\":%s,\"max\":%s}}", priceRangeKey, prices[0], prices[1])
@@ -92,7 +97,7 @@ func (v megaMarketViewer) getPriceRangeURLView(priceRange string) string {
 	return urlPriceRange
 }
 
-// getSortParamView returns the mapped value of the sort parameter specified for megamarket-service.
+// getSortParamURLView returns the mapped value of the sort parameter specified for megamarket-service.
 func (v megaMarketViewer) getSortParamURLView(sort string) string {
 	if sort == "priceup" {
 		return "1"

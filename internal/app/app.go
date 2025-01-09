@@ -52,7 +52,7 @@ func NewService() Service {
 				log,
 				map[entities.Market]services.ApiInteractor{
 					entities.Wildberries: wildb.NewWildberriesAPI(chrome.NewContext(), log, 1),
-					entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log, 1),
+					entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log),
 				})),
 		logger:      log,
 		mainLogFile: mainLogFile,

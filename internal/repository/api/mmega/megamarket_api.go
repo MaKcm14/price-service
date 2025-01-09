@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"math"
 	"net/http"
-	"time"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
@@ -16,35 +16,25 @@ import (
 )
 
 type MegaMarketAPI struct {
-	logger    *slog.Logger
-	loadCoeff time.Duration
-	ctx       context.Context
-	parser    megaMarketParser
-	view      megaMarketViewer
+	logger *slog.Logger
+	ctx    context.Context
+	parser megaMarketParser
+	view   megaMarketViewer
 }
 
-func NewMegaMarketAPI(ctx context.Context, log *slog.Logger, loadCoeff int) MegaMarketAPI {
+func NewMegaMarketAPI(ctx context.Context, log *slog.Logger) MegaMarketAPI {
 	return MegaMarketAPI{
-		logger:    log,
-		ctx:       ctx,
-		loadCoeff: time.Duration(loadCoeff) * time.Millisecond,
+		logger: log,
+		ctx:    ctx,
 		parser: megaMarketParser{
 			logger: log,
 		},
 	}
 }
 
-// getProducts is the main function of getting the products from the MegaMarket-API calls.
-func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest, filters ...string) (entities.ProductSample, error) {
-	const serviceType = "megamarket.service.main-products-getter"
-
-	respProds := struct {
-		Items []megaMarketProduct `json:"items"`
-	}{
-		Items: make([]megaMarketProduct, 0, 100),
-	}
-
-	products := make([]entities.Product, 0, 50)
+// getByPassProducts gets the products from by-pass-service.
+func (m MegaMarketAPI) getByPassProducts(ctx echo.Context, request dto.ProductRequest, filters []string) (*http.Response, error) {
+	const serviceType = "megamarket.service.by-pass-interaction"
 
 	byPassRequest := newByPassServiceRequest(
 		request.Query,
@@ -56,19 +46,42 @@ func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest,
 
 	if api.IsConnectionClosed(ctx) {
 		m.logger.Warn(fmt.Sprintf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed))
-		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %w", serviceType, api.ErrConnectionClosed)
+		return nil, fmt.Errorf("error of processing the %v: %w", serviceType, api.ErrConnectionClosed)
 	}
 
 	resp, err := http.Post("http://localhost:8081/mmarket", "application/json", bytes.NewBuffer(requestBody))
 
 	if err != nil {
 		m.logger.Warn(fmt.Sprintf("error of the %s: %v", serviceType, err))
-		return entities.ProductSample{}, fmt.Errorf("error of the %s: %w", serviceType, api.ErrByPassServiceResponse)
+		return nil, fmt.Errorf("error of the %s: %w", serviceType, api.ErrByPassServiceResponse)
 	} else if resp.StatusCode > 299 {
 		errDescr := make(map[string]string)
+
 		json.Marshal(errDescr)
+
 		m.logger.Warn(fmt.Sprintf("error of the %s: %s", serviceType, errDescr["error"]))
-		return entities.ProductSample{}, fmt.Errorf("error of the %s: %w", serviceType, api.ErrByPassServiceResponse)
+		return nil, fmt.Errorf("error of the %s: %w", serviceType, api.ErrByPassServiceResponse)
+	}
+
+	return resp, nil
+}
+
+// getProducts is the main function of getting the products from the MegaMarket-API calls.
+func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest, filters ...string) (entities.ProductSample, error) {
+	const serviceType = "megamarket.service.main-products-getter"
+
+	respByPassProds := struct {
+		Items []megaMarketProduct `json:"items"`
+	}{
+		Items: make([]megaMarketProduct, 0, 100),
+	}
+	products := make([]entities.Product, 0, 50)
+
+	resp, err := m.getByPassProducts(ctx, request, filters)
+
+	if err != nil {
+		m.logger.Warn(fmt.Sprintf("error of the %v: %v", serviceType, err))
+		return entities.ProductSample{}, err
 	}
 	defer resp.Body.Close()
 
@@ -79,23 +92,32 @@ func (m MegaMarketAPI) getProducts(ctx echo.Context, request dto.ProductRequest,
 			serviceType, err)
 	}
 
-	err = json.Unmarshal(jsonProducts, &respProds)
+	err = json.Unmarshal(jsonProducts, &respByPassProds)
 
 	if err != nil {
 		m.logger.Warn(fmt.Sprintf("error of %v: %v: %v", serviceType, api.ErrJSONResponseParsing, err))
 		return entities.ProductSample{}, fmt.Errorf("error of the %v: %w: %v", serviceType, api.ErrJSONResponseParsing, err)
 	}
 
-	for _, product := range respProds.Items {
+	amount := len(respByPassProds.Items)
+
+	if request.Amount == "min" {
+		amount = int(math.Min(float64(minValue), float64(amount)))
+	}
+
+	for i := 0; i != amount; i++ {
+		if respByPassProds.Items[i].FinalPrice == 0 {
+			continue
+		}
 		products = append(products, entities.Product{
-			Name:  product.Goods.Title,
-			Brand: product.Goods.Brand,
-			Price: entities.NewPrice(product.Price, product.FinalPrice),
+			Name:  respByPassProds.Items[i].Goods.Title,
+			Brand: respByPassProds.Items[i].Goods.Brand,
+			Price: entities.NewPrice(respByPassProds.Items[i].Price, respByPassProds.Items[i].FinalPrice),
 			Links: entities.ProductLink{
-				URL:       product.Goods.URL,
-				ImageLink: product.Goods.TitleImageLink,
+				URL:       respByPassProds.Items[i].Goods.URL,
+				ImageLink: respByPassProds.Items[i].Goods.TitleImageLink,
 			},
-			Supplier: product.Offer.MerchantName,
+			Supplier: respByPassProds.Items[i].Offer.MerchantName,
 		})
 	}
 
