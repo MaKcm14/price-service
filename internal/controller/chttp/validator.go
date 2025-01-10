@@ -66,8 +66,6 @@ func (v validator) validMarkets(ctx echo.Context, request *dto.ProductRequest) e
 	for _, market := range strings.Split(ctx.QueryParam("markets"), " ") {
 		if market == "wildberries" {
 			request.Markets = append(request.Markets, entities.Wildberries)
-		} else if market == "ozon" {
-			request.Markets = append(request.Markets, entities.Ozon)
 		} else if market == "megamarket" {
 			request.Markets = append(request.Markets, entities.MegaMarket)
 		}

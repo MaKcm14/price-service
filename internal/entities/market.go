@@ -3,8 +3,7 @@ package entities
 type Market int
 
 const (
-	Ozon Market = iota
-	Wildberries
+	Wildberries Market = iota
 	MegaMarket
 	NotExists
 )
