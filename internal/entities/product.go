@@ -32,8 +32,6 @@ func NewProductSample(products []Product, sampleLink string, sampleMarket Market
 
 	if sampleMarket == Wildberries {
 		market = "Wildberries"
-	} else if sampleMarket == Ozon {
-		market = "Ozon"
 	} else if sampleMarket == MegaMarket {
 		market = "MegaMarket"
 	}

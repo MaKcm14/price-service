@@ -51,10 +51,8 @@ func (v validator) validQuery(ctx echo.Context, request *dto.ProductRequest) err
 func (v validator) validSample(ctx echo.Context, request *dto.ProductRequest) error {
 	sample, err := strconv.Atoi(ctx.QueryParam("sample"))
 
-	if sample < 0 {
-		return ErrRequestInfo
-	} else if err != nil {
-		return err
+	if sample < 0 || err != nil {
+		sample = 1
 	}
 	request.Sample = sample
 
@@ -66,8 +64,6 @@ func (v validator) validMarkets(ctx echo.Context, request *dto.ProductRequest) e
 	for _, market := range strings.Split(ctx.QueryParam("markets"), " ") {
 		if market == "wildberries" {
 			request.Markets = append(request.Markets, entities.Wildberries)
-		} else if market == "ozon" {
-			request.Markets = append(request.Markets, entities.Ozon)
 		} else if market == "megamarket" {
 			request.Markets = append(request.Markets, entities.MegaMarket)
 		}
