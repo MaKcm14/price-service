@@ -16,7 +16,7 @@ Here you can find the common description of the service's API.
 The API-service was made as simple as possible for fast remembering the API-paths and parameters.
 
 #### Note
-It's recommended to use this service only into the **protected perimeter* (as local microservice ideally) 
+It's recommended to use this service only into the **protected perimeter** (as local microservice ideally) 
 because it was developed as *the internal local service* that doesn't have the global protection from external web-attacks.
 
 *(If you're interested in the external API for this service see the api-gateway-service repo)*

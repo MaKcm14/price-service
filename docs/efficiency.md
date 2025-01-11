@@ -1,6 +1,6 @@
-## This is a description of the service eficiency.
+# This is a description of service eficiency.
 
-# The time of responses.
+## The time of responses.
 
 Due to all markets need to parse the time of the response is clearly depends on the speed of the
 

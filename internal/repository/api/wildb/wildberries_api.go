@@ -10,7 +10,6 @@ import (
 
 	"github.com/chromedp/chromedp"
 	"github.com/chromedp/chromedp/kb"
-
 	"github.com/labstack/echo/v4"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
