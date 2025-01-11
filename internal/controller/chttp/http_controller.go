@@ -7,12 +7,16 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
+
+	_ "github.com/MaKcm14/best-price-service/price-service/docs"
 )
 
 // Controller handles the clients' requests.
@@ -60,12 +64,19 @@ func (c *Controller) configPaths() {
 	c.contr.GET("/products/filter/price/best-price", c.handleBestPriceRequest)
 	c.contr.GET("/products/filter/price/exact-price", c.handleExactPriceRequest)
 	c.contr.GET("/products/filter/markets", c.handleMarketsRequest)
+
+	c.contr.GET("/swagger/*", echoSwagger.WrapHandler)
 }
 
 // configMW configurates the controller's middleware.
 func (c *Controller) configMW() {
 	c.contr.Use(middleware.BodyLimit("600K"))
 	c.contr.Use(middleware.Gzip())
+
+	c.contr.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Skipper: func(c echo.Context) bool {
+			return strings.Contains(c.Request().URL.Path, "swagger")
+		}}))
 
 	c.contr.HTTPErrorHandler = func(err error, ctx echo.Context) {
 		if errHttp, flagCheck := err.(*echo.HTTPError); flagCheck {
@@ -93,7 +104,28 @@ func (c *Controller) setBasicHeaders(ctx echo.Context, buf []byte) {
 	ctx.Response().Header().Add("Content-Length", fmt.Sprintf("%d", len(buf)+1))
 }
 
-// filterByPriceUpDown defines the logic of the handling the filter-by-price-down-up requests.
+// handlePriceRangeRequest defines the logic of the handling the filter-by-price-down-up requests.
+//
+//	@summary		price-range filtering
+//	@description	this endpoint provides filtering products from marketplaces by a specified price range.
+//	@tags			Price-Filter
+//	@produce		json
+//
+//	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)
+//	@param			price_down	query		integer		true	"the price range's lower bound"								minimum(0)
+//	@param			price_up	query		integer		true	"the price range's upper bound"								minimum(0)									validate("value: bigger or equal than price_down")
+//	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)
+//	@param			sample		query		integer		false	"the num of products' sample"								minimum(1)									default(1)
+//	@param			sort		query		string		false	"the type of products' sample sorting"						Enums(popular, pricedown, priceup, newly)	default(popular)
+//	@param			no-image	query		integer		false	"the flag that defines 'do image links need to be parsed?'"	Enums(0, 1)									default(1)
+//	@param			amount		query		string		false	"the amount of the products in response's sample"			Enums(min, max)								default(min)
+//
+//
+//	@success		200			{object}	chttp.ProductResponse
+//	@failure		400			{object}	chttp.ResponseErr
+//	@failure		500			{object}	chttp.ResponseErr
+//	@failure		502			{object}	chttp.ResponseErr
+//	@router			/price/price-range [get]
 func (c *Controller) handlePriceRangeRequest(ctx echo.Context) error {
 	const filterType = "price-range-filter"
 
@@ -141,7 +173,7 @@ func (c *Controller) handlePriceRangeRequest(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// filterByBestPrice defines the logic of the handling the filter-by-minimal-price requests.
+// handleBestPriceRequest defines the logic of the handling the filter-by-minimal-price requests.
 func (c *Controller) handleBestPriceRequest(ctx echo.Context) error {
 	const filterType = "best-price-filter"
 
@@ -181,7 +213,7 @@ func (c *Controller) handleBestPriceRequest(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// filterByExactPrice defines the logic of the handling the filter-by-set-price requests.
+// handleExactPriceRequest defines the logic of the handling the filter-by-set-price requests.
 func (c *Controller) handleExactPriceRequest(ctx echo.Context) error {
 	const filterType = "exact-price-filter"
 
@@ -228,7 +260,7 @@ func (c *Controller) handleExactPriceRequest(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-// filterByMarkets defines the logic of the handling the filter-by-markets requests.
+// handleMarketsRequest defines the logic of the handling the filter-by-markets requests.
 func (c *Controller) handleMarketsRequest(ctx echo.Context) error {
 	const filterType = "markets-filter"
 
