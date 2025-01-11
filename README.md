@@ -56,6 +56,8 @@ If you set the wrong value of the parameters the service will use the *default v
 
   this parameter is a **required** query parameter that **must be set**. It formates according to the common URL-encoding.
 
+  It's recommended to set this parameter as exact as possible because the response's accuracy will depend on it.
+
   <hr>
 
 - `markets` : `necessary_parameter`
@@ -189,7 +191,7 @@ You can specified it as you want with the **extra-parameter_with_default_value**
   <hr>
 
 #### P.S.
-For more information about the API see the ***swagger-API-docs.***
+For more information about the API see the ***swagger-API-docs*** using the endpoint `/swagger`
 
 ## How to use
 

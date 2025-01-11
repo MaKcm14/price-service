@@ -106,14 +106,14 @@ func (c *Controller) setBasicHeaders(ctx echo.Context, buf []byte) {
 
 // handlePriceRangeRequest defines the logic of the handling the filter-by-price-down-up requests.
 //
-//	@summary		price-range filtering
-//	@description	this endpoint provides filtering products from marketplaces by a specified price range.
+//	@summary		price range filtering
+//	@description	this endpoint provides filtering products from marketplaces by a specified price range
 //	@tags			Price-Filter
 //	@produce		json
 //
 //	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)
 //	@param			price_down	query		integer		true	"the price range's lower bound"								minimum(0)
-//	@param			price_up	query		integer		true	"the price range's upper bound"								minimum(0)									validate("value: bigger or equal than price_down")
+//	@param			price_up	query		integer		true	"the price range's upper bound"								minimum(1)
 //	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)
 //	@param			sample		query		integer		false	"the num of products' sample"								minimum(1)									default(1)
 //	@param			sort		query		string		false	"the type of products' sample sorting"						Enums(popular, pricedown, priceup, newly)	default(popular)
@@ -125,7 +125,7 @@ func (c *Controller) setBasicHeaders(ctx echo.Context, buf []byte) {
 //	@failure		400			{object}	chttp.ResponseErr
 //	@failure		500			{object}	chttp.ResponseErr
 //	@failure		502			{object}	chttp.ResponseErr
-//	@router			/price/price-range [get]
+//	@router			/products/filter/price/price-range [get]
 func (c *Controller) handlePriceRangeRequest(ctx echo.Context) error {
 	const filterType = "price-range-filter"
 
@@ -174,6 +174,25 @@ func (c *Controller) handlePriceRangeRequest(ctx echo.Context) error {
 }
 
 // handleBestPriceRequest defines the logic of the handling the filter-by-minimal-price requests.
+//
+//	@summary		best price filtering
+//	@description	this endpoint provides filtering products from marketplaces by the best and minimum price
+//	@tags			Price-Filter
+//	@produce		json
+//
+//	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)
+//	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)
+//	@param			sample		query		integer		false	"the num of products' sample"								minimum(1)									default(1)
+//	@param			sort		query		string		false	"the type of products' sample sorting"						Enums(popular, pricedown, priceup, newly)	default(popular)
+//	@param			no-image	query		integer		false	"the flag that defines 'do image links need to be parsed?'"	Enums(0, 1)									default(1)
+//	@param			amount		query		string		false	"the amount of the products in response's sample"			Enums(min, max)								default(min)
+//
+//
+//	@success		200			{object}	chttp.ProductResponse
+//	@failure		400			{object}	chttp.ResponseErr
+//	@failure		500			{object}	chttp.ResponseErr
+//	@failure		502			{object}	chttp.ResponseErr
+//	@router			/products/filter/price/best-price [get]
 func (c *Controller) handleBestPriceRequest(ctx echo.Context) error {
 	const filterType = "best-price-filter"
 
@@ -214,6 +233,26 @@ func (c *Controller) handleBestPriceRequest(ctx echo.Context) error {
 }
 
 // handleExactPriceRequest defines the logic of the handling the filter-by-set-price requests.
+//
+//	@summary		exact filtering
+//	@description	this endpoint provides filtering products from marketplaces in range (exact-price, exact-price * 1.05 (+5%))
+//	@tags			Price-Filter
+//	@produce		json
+//
+//	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)
+//	@param			price		query		integer		true	"the value of exact price"								minimum(1)
+//	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)
+//	@param			sample		query		integer		false	"the num of products' sample"								minimum(1)									default(1)
+//	@param			sort		query		string		false	"the type of products' sample sorting"						Enums(popular, pricedown, priceup, newly)	default(popular)
+//	@param			no-image	query		integer		false	"the flag that defines 'do image links need to be parsed?'"	Enums(0, 1)									default(1)
+//	@param			amount		query		string		false	"the amount of the products in response's sample"			Enums(min, max)								default(min)
+//
+//
+//	@success		200			{object}	chttp.ProductResponse
+//	@failure		400			{object}	chttp.ResponseErr
+//	@failure		500			{object}	chttp.ResponseErr
+//	@failure		502			{object}	chttp.ResponseErr
+//	@router			/products/filter/price/exact-price [get]
 func (c *Controller) handleExactPriceRequest(ctx echo.Context) error {
 	const filterType = "exact-price-filter"
 
@@ -261,6 +300,25 @@ func (c *Controller) handleExactPriceRequest(ctx echo.Context) error {
 }
 
 // handleMarketsRequest defines the logic of the handling the filter-by-markets requests.
+//
+//	@summary		common filtering
+//	@description	this endpoint provides filtering products from marketplaces without any specified filtration.
+//	@tags			Common-Filter
+//	@produce		json
+//
+//	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)
+//	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)
+//	@param			sample		query		integer		false	"the num of products' sample"								minimum(1)									default(1)
+//	@param			sort		query		string		false	"the type of products' sample sorting"						Enums(popular, pricedown, priceup, newly)	default(popular)
+//	@param			no-image	query		integer		false	"the flag that defines 'do image links need to be parsed?'"	Enums(0, 1)									default(1)
+//	@param			amount		query		string		false	"the amount of the products in response's sample"			Enums(min, max)								default(min)
+//
+//
+//	@success		200			{object}	chttp.ProductResponse
+//	@failure		400			{object}	chttp.ResponseErr
+//	@failure		500			{object}	chttp.ResponseErr
+//	@failure		502			{object}	chttp.ResponseErr
+//	@router			/products/filter/markets [get]
 func (c *Controller) handleMarketsRequest(ctx echo.Context) error {
 	const filterType = "markets-filter"
 

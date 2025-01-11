@@ -22,16 +22,357 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/price/price-range": {
+        "/products/filter/markets": {
             "get": {
-                "description": "this endpoint provides filtering products from marketplaces by a specified price range.",
+                "description": "this endpoint provides filtering products from marketplaces without any specified filtration.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common-Filter"
+                ],
+                "summary": "common filtering",
+                "parameters": [
+                    {
+                        "minLength": 1,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "ssv",
+                        "description": "the exact query string",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minLength": 1,
+                        "type": "array",
+                        "items": {
+                            "enum": [
+                                "wildberries",
+                                "megamarket"
+                            ],
+                            "type": "string"
+                        },
+                        "collectionFormat": "ssv",
+                        "description": "the list of the markets using for search",
+                        "name": "markets",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "the num of products' sample",
+                        "name": "sample",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "popular",
+                            "pricedown",
+                            "priceup",
+                            "newly"
+                        ],
+                        "type": "string",
+                        "default": "popular",
+                        "description": "the type of products' sample sorting",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            0,
+                            1
+                        ],
+                        "type": "integer",
+                        "default": 1,
+                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "name": "no-image",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "min",
+                            "max"
+                        ],
+                        "type": "string",
+                        "default": "min",
+                        "description": "the amount of the products in response's sample",
+                        "name": "amount",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ResponseErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ResponseErr"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ResponseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/filter/price/best-price": {
+            "get": {
+                "description": "this endpoint provides filtering products from marketplaces by the best and minimum price",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Price-Filter"
                 ],
-                "summary": "price-range filtering",
+                "summary": "best price filtering",
+                "parameters": [
+                    {
+                        "minLength": 1,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "ssv",
+                        "description": "the exact query string",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minLength": 1,
+                        "type": "array",
+                        "items": {
+                            "enum": [
+                                "wildberries",
+                                "megamarket"
+                            ],
+                            "type": "string"
+                        },
+                        "collectionFormat": "ssv",
+                        "description": "the list of the markets using for search",
+                        "name": "markets",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "the num of products' sample",
+                        "name": "sample",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "popular",
+                            "pricedown",
+                            "priceup",
+                            "newly"
+                        ],
+                        "type": "string",
+                        "default": "popular",
+                        "description": "the type of products' sample sorting",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            0,
+                            1
+                        ],
+                        "type": "integer",
+                        "default": 1,
+                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "name": "no-image",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "min",
+                            "max"
+                        ],
+                        "type": "string",
+                        "default": "min",
+                        "description": "the amount of the products in response's sample",
+                        "name": "amount",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ResponseErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ResponseErr"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ResponseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/filter/price/exact-price": {
+            "get": {
+                "description": "this endpoint provides filtering products from marketplaces in range (exact-price, exact-price * 1.05 (+5%))",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Price-Filter"
+                ],
+                "summary": "exact filtering",
+                "parameters": [
+                    {
+                        "minLength": 1,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "ssv",
+                        "description": "the exact query string",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "the value of exact price",
+                        "name": "price",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minLength": 1,
+                        "type": "array",
+                        "items": {
+                            "enum": [
+                                "wildberries",
+                                "megamarket"
+                            ],
+                            "type": "string"
+                        },
+                        "collectionFormat": "ssv",
+                        "description": "the list of the markets using for search",
+                        "name": "markets",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "the num of products' sample",
+                        "name": "sample",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "popular",
+                            "pricedown",
+                            "priceup",
+                            "newly"
+                        ],
+                        "type": "string",
+                        "default": "popular",
+                        "description": "the type of products' sample sorting",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            0,
+                            1
+                        ],
+                        "type": "integer",
+                        "default": 1,
+                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "name": "no-image",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "min",
+                            "max"
+                        ],
+                        "type": "string",
+                        "default": "min",
+                        "description": "the amount of the products in response's sample",
+                        "name": "amount",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ResponseErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ResponseErr"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ResponseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/filter/price/price-range": {
+            "get": {
+                "description": "this endpoint provides filtering products from marketplaces by a specified price range",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Price-Filter"
+                ],
+                "summary": "price range filtering",
                 "parameters": [
                     {
                         "minLength": 1,
@@ -54,7 +395,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "minimum": 0,
+                        "minimum": 1,
                         "type": "integer",
                         "description": "the price range's upper bound",
                         "name": "price_up",
