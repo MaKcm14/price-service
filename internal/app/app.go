@@ -17,7 +17,7 @@ import (
 	"github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
 )
 
-// App unions every parts of the application.
+// Service unions every parts of the application.
 type Service struct {
 	appContr    chttp.Controller
 	chrome      services.Driver
@@ -62,11 +62,11 @@ func NewService() Service {
 }
 
 // Run starts the configured application.
-func (a Service) Run() {
-	defer a.chrome.Close()
-	defer a.mainLogFile.Close()
-	defer a.logger.Info("the app was STOPPED")
+func (s Service) Run() {
+	defer s.chrome.Close()
+	defer s.mainLogFile.Close()
+	defer s.logger.Info("the app was STOPPED")
 
-	a.logger.Info("the app was STARTED")
-	a.appContr.Run(a.appSet.Socket)
+	s.logger.Info("the app was STARTED")
+	s.appContr.Run(s.appSet.Socket)
 }

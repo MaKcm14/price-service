@@ -1,0 +1,423 @@
+basePath: /
+definitions:
+  chttp.ProductResponse:
+    properties:
+      samples:
+        additionalProperties:
+          $ref: '#/definitions/entities.ProductSample'
+        type: object
+    type: object
+  chttp.ResponseErr:
+    properties:
+      error:
+        type: string
+    type: object
+  entities.Currency:
+    enum:
+    - rub
+    type: string
+    x-enum-varnames:
+    - RUB
+  entities.Price:
+    properties:
+      base_price:
+        type: integer
+      discount:
+        type: integer
+      discount_price:
+        type: integer
+    type: object
+  entities.Product:
+    properties:
+      brand:
+        type: string
+      name:
+        type: string
+      price:
+        $ref: '#/definitions/entities.Price'
+      related_links:
+        $ref: '#/definitions/entities.ProductLink'
+      supplier:
+        type: string
+    type: object
+  entities.ProductLink:
+    properties:
+      image_link:
+        type: string
+      url:
+        type: string
+    type: object
+  entities.ProductSample:
+    properties:
+      currency:
+        $ref: '#/definitions/entities.Currency'
+      main_products_sample:
+        type: string
+      market:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/entities.Product'
+        type: array
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: maksimacx50@gmail.com
+    name: API Support
+  description: This is a products' prices getting, filtering and monitoring API.
+  license:
+    name: Unlicense
+    url: https://unlicense.org/
+  title: Price Service API
+  version: 0.9.0
+paths:
+  /products/filter/markets:
+    get:
+      description: this endpoint provides filtering products from marketplaces without
+        any specified filtration
+      parameters:
+      - collectionFormat: ssv
+        description: the exact query string
+        example: iphone+11
+        in: query
+        items:
+          type: string
+        minLength: 1
+        name: query
+        required: true
+        type: array
+      - collectionFormat: ssv
+        description: the list of the markets using for search
+        example: megamarket+wildberries
+        in: query
+        items:
+          enum:
+          - wildberries
+          - megamarket
+          type: string
+        minLength: 1
+        name: markets
+        required: true
+        type: array
+      - default: 1
+        description: the num of products' sample
+        in: query
+        minimum: 1
+        name: sample
+        type: integer
+      - default: popular
+        description: the type of products' sample sorting
+        enum:
+        - popular
+        - pricedown
+        - priceup
+        - newly
+        in: query
+        name: sort
+        type: string
+      - default: 1
+        description: the flag that defines 'Should image links be parsed?'
+        enum:
+        - 0
+        - 1
+        in: query
+        name: no-image
+        type: integer
+      - default: min
+        description: the amount of the products in response's sample
+        enum:
+        - min
+        - max
+        in: query
+        name: amount
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chttp.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+      summary: common filtering
+      tags:
+      - Common-Filters
+  /products/filter/price/best-price:
+    get:
+      description: this endpoint provides filtering products from marketplaces with
+        the best and minimum price
+      parameters:
+      - collectionFormat: ssv
+        description: the exact query string
+        example: iphone+11
+        in: query
+        items:
+          type: string
+        minLength: 1
+        name: query
+        required: true
+        type: array
+      - collectionFormat: ssv
+        description: the list of the markets using for search
+        example: megamarket+wildberries
+        in: query
+        items:
+          enum:
+          - wildberries
+          - megamarket
+          type: string
+        minLength: 1
+        name: markets
+        required: true
+        type: array
+      - default: 1
+        description: the num of products' sample
+        in: query
+        minimum: 1
+        name: sample
+        type: integer
+      - default: popular
+        description: the type of products' sample sorting
+        enum:
+        - popular
+        - pricedown
+        - priceup
+        - newly
+        in: query
+        name: sort
+        type: string
+      - default: 1
+        description: the flag that defines 'Should image links be parsed?'
+        enum:
+        - 0
+        - 1
+        in: query
+        name: no-image
+        type: integer
+      - default: min
+        description: the amount of the products in response's sample
+        enum:
+        - min
+        - max
+        in: query
+        name: amount
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chttp.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+      summary: best price filtering
+      tags:
+      - Price-Filters
+  /products/filter/price/exact-price:
+    get:
+      description: this endpoint provides filtering products from marketplaces with
+        price in range (exact-price, exact-price * 1.05 (+5%))
+      parameters:
+      - collectionFormat: ssv
+        description: the exact query string
+        example: iphone+11
+        in: query
+        items:
+          type: string
+        minLength: 1
+        name: query
+        required: true
+        type: array
+      - description: the value of exact price
+        in: query
+        minimum: 1
+        name: price
+        required: true
+        type: integer
+      - collectionFormat: ssv
+        description: the list of the markets using for search
+        example: megamarket+wildberries
+        in: query
+        items:
+          enum:
+          - wildberries
+          - megamarket
+          type: string
+        minLength: 1
+        name: markets
+        required: true
+        type: array
+      - default: 1
+        description: the num of products' sample
+        in: query
+        minimum: 1
+        name: sample
+        type: integer
+      - default: popular
+        description: the type of products' sample sorting
+        enum:
+        - popular
+        - pricedown
+        - priceup
+        - newly
+        in: query
+        name: sort
+        type: string
+      - default: 1
+        description: the flag that defines 'Should image links be parsed??'
+        enum:
+        - 0
+        - 1
+        in: query
+        name: no-image
+        type: integer
+      - default: min
+        description: the amount of the products in response's sample
+        enum:
+        - min
+        - max
+        in: query
+        name: amount
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chttp.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+      summary: exact price filtering
+      tags:
+      - Price-Filters
+  /products/filter/price/price-range:
+    get:
+      description: this endpoint provides filtering products from marketplaces with
+        specified price range
+      parameters:
+      - collectionFormat: ssv
+        description: the exact query string
+        example: iphone+11
+        in: query
+        items:
+          type: string
+        minLength: 1
+        name: query
+        required: true
+        type: array
+      - description: 'the price range''s lower bound: less than price_up'
+        in: query
+        minimum: 0
+        name: price_down
+        required: true
+        type: integer
+      - description: 'the price range''s upper bound: more than price_down'
+        in: query
+        minimum: 1
+        name: price_up
+        required: true
+        type: integer
+      - collectionFormat: ssv
+        description: the list of the markets using for search
+        example: megamarket+wildberries
+        in: query
+        items:
+          enum:
+          - wildberries
+          - megamarket
+          type: string
+        minLength: 1
+        name: markets
+        required: true
+        type: array
+      - default: 1
+        description: the num of products' sample
+        in: query
+        minimum: 1
+        name: sample
+        type: integer
+      - default: popular
+        description: the type of products' sample sorting
+        enum:
+        - popular
+        - pricedown
+        - priceup
+        - newly
+        in: query
+        name: sort
+        type: string
+      - default: 1
+        description: the flag that defines 'Should image links be parsed?'
+        enum:
+        - 0
+        - 1
+        in: query
+        name: no-image
+        type: integer
+      - default: min
+        description: the amount of the products in response's sample
+        enum:
+        - min
+        - max
+        in: query
+        name: amount
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chttp.ProductResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/chttp.ResponseErr'
+      summary: price range filtering
+      tags:
+      - Price-Filters
+schemes:
+- http
+swagger: "2.0"

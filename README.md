@@ -16,7 +16,7 @@ Here you can find the common description of the service's API.
 The API-service was made as simple as possible for fast remembering the API-paths and parameters.
 
 #### Note
-It's recommended to use this service only into the **protected perimeter* (as local microservice ideally) 
+It's recommended to use this service only into the **protected perimeter** (as local microservice ideally) 
 because it was developed as *the internal local service* that doesn't have the global protection from external web-attacks.
 
 *(If you're interested in the external API for this service see the api-gateway-service repo)*
@@ -55,6 +55,8 @@ If you set the wrong value of the parameters the service will use the *default v
 - `query` :  `necessary_parameter`
 
   this parameter is a **required** query parameter that **must be set**. It formates according to the common URL-encoding.
+
+  It's recommended to set this parameter as exact as possible because the response's accuracy will depend on it.
 
   <hr>
 
@@ -131,7 +133,7 @@ If you set the wrong value of the parameters the service will use the *default v
   This parameter influences only on the some markets that parse with using the browser's driver. The next markets' parsers use it while the products' getting:
   - ***Wildberries*** 
 
-  Other parsers *don't use it*.
+  Other parsers *don't use it and ignore it*.
 
   <hr>
 
@@ -189,7 +191,7 @@ You can specified it as you want with the **extra-parameter_with_default_value**
   <hr>
 
 #### P.S.
-For more information about the API see the ***swagger-API-docs.***
+For more information about the API see the ***swagger-API-docs*** using the endpoint `/swagger`
 
 ## How to use
 
