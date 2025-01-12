@@ -1,8 +1,8 @@
 package chttp
 
 //	@title			Price Service API
-//	@version		1.0.0
-//	@description	This is a products' prices getting, filtering and monitoring.
+//	@version		0.9.0
+//	@description	This is a products' prices getting, filtering and monitoring API.
 
 //	@contact.name	API Support
 //	@contact.email	maksimacx50@gmail.com
@@ -14,4 +14,4 @@ package chttp
 //	@BasePath	/
 
 //	@schemes	http
-//	@tags		Price-Filter,Common-Filter
+//	@tags		Price-Filters,Common-Filters

@@ -4,7 +4,7 @@
     ],
     "swagger": "2.0",
     "info": {
-        "description": "This is a products' prices getting, filtering and monitoring.",
+        "description": "This is a products' prices getting, filtering and monitoring API.",
         "title": "Price Service API",
         "contact": {
             "name": "API Support",
@@ -14,19 +14,19 @@
             "name": "Unlicense",
             "url": "https://unlicense.org/"
         },
-        "version": "1.0.0"
+        "version": "0.9.0"
     },
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
         "/products/filter/markets": {
             "get": {
-                "description": "this endpoint provides filtering products from marketplaces without any specified filtration.",
+                "description": "this endpoint provides filtering products from marketplaces without any specified filtration",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Common-Filter"
+                    "Common-Filters"
                 ],
                 "summary": "common filtering",
                 "parameters": [
@@ -37,6 +37,7 @@
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "iphone+11",
                         "description": "the exact query string",
                         "name": "query",
                         "in": "query",
@@ -53,6 +54,7 @@
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "megamarket+wildberries",
                         "description": "the list of the markets using for search",
                         "name": "markets",
                         "in": "query",
@@ -86,7 +88,7 @@
                         ],
                         "type": "integer",
                         "default": 1,
-                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "description": "the flag that defines 'Should image links be parsed?'",
                         "name": "no-image",
                         "in": "query"
                     },
@@ -132,12 +134,12 @@
         },
         "/products/filter/price/best-price": {
             "get": {
-                "description": "this endpoint provides filtering products from marketplaces by the best and minimum price",
+                "description": "this endpoint provides filtering products from marketplaces with the best and minimum price",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Price-Filter"
+                    "Price-Filters"
                 ],
                 "summary": "best price filtering",
                 "parameters": [
@@ -148,6 +150,7 @@
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "iphone+11",
                         "description": "the exact query string",
                         "name": "query",
                         "in": "query",
@@ -164,6 +167,7 @@
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "megamarket+wildberries",
                         "description": "the list of the markets using for search",
                         "name": "markets",
                         "in": "query",
@@ -197,7 +201,7 @@
                         ],
                         "type": "integer",
                         "default": 1,
-                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "description": "the flag that defines 'Should image links be parsed?'",
                         "name": "no-image",
                         "in": "query"
                     },
@@ -243,14 +247,14 @@
         },
         "/products/filter/price/exact-price": {
             "get": {
-                "description": "this endpoint provides filtering products from marketplaces in range (exact-price, exact-price * 1.05 (+5%))",
+                "description": "this endpoint provides filtering products from marketplaces with price in range (exact-price, exact-price * 1.05 (+5%))",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Price-Filter"
+                    "Price-Filters"
                 ],
-                "summary": "exact filtering",
+                "summary": "exact price filtering",
                 "parameters": [
                     {
                         "minLength": 1,
@@ -259,6 +263,7 @@
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "iphone+11",
                         "description": "the exact query string",
                         "name": "query",
                         "in": "query",
@@ -283,6 +288,7 @@
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "megamarket+wildberries",
                         "description": "the list of the markets using for search",
                         "name": "markets",
                         "in": "query",
@@ -316,7 +322,7 @@
                         ],
                         "type": "integer",
                         "default": 1,
-                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "description": "the flag that defines 'Should image links be parsed??'",
                         "name": "no-image",
                         "in": "query"
                     },
@@ -362,12 +368,12 @@
         },
         "/products/filter/price/price-range": {
             "get": {
-                "description": "this endpoint provides filtering products from marketplaces by a specified price range",
+                "description": "this endpoint provides filtering products from marketplaces with specified price range",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Price-Filter"
+                    "Price-Filters"
                 ],
                 "summary": "price range filtering",
                 "parameters": [
@@ -378,6 +384,7 @@
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "iphone+11",
                         "description": "the exact query string",
                         "name": "query",
                         "in": "query",
@@ -386,7 +393,7 @@
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "the price range's lower bound",
+                        "description": "the price range's lower bound: less than price_up",
                         "name": "price_down",
                         "in": "query",
                         "required": true
@@ -394,7 +401,7 @@
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "the price range's upper bound",
+                        "description": "the price range's upper bound: more than price_down",
                         "name": "price_up",
                         "in": "query",
                         "required": true
@@ -410,6 +417,7 @@
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "megamarket+wildberries",
                         "description": "the list of the markets using for search",
                         "name": "markets",
                         "in": "query",
@@ -443,7 +451,7 @@
                         ],
                         "type": "integer",
                         "default": 1,
-                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "description": "the flag that defines 'Should image links be parsed?'",
                         "name": "no-image",
                         "in": "query"
                     },

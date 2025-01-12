@@ -65,20 +65,21 @@ info:
   contact:
     email: maksimacx50@gmail.com
     name: API Support
-  description: This is a products' prices getting, filtering and monitoring.
+  description: This is a products' prices getting, filtering and monitoring API.
   license:
     name: Unlicense
     url: https://unlicense.org/
   title: Price Service API
-  version: 1.0.0
+  version: 0.9.0
 paths:
   /products/filter/markets:
     get:
       description: this endpoint provides filtering products from marketplaces without
-        any specified filtration.
+        any specified filtration
       parameters:
       - collectionFormat: ssv
         description: the exact query string
+        example: iphone+11
         in: query
         items:
           type: string
@@ -88,6 +89,7 @@ paths:
         type: array
       - collectionFormat: ssv
         description: the list of the markets using for search
+        example: megamarket+wildberries
         in: query
         items:
           enum:
@@ -115,7 +117,7 @@ paths:
         name: sort
         type: string
       - default: 1
-        description: the flag that defines 'do image links need to be parsed?'
+        description: the flag that defines 'Should image links be parsed?'
         enum:
         - 0
         - 1
@@ -151,14 +153,15 @@ paths:
             $ref: '#/definitions/chttp.ResponseErr'
       summary: common filtering
       tags:
-      - Common-Filter
+      - Common-Filters
   /products/filter/price/best-price:
     get:
-      description: this endpoint provides filtering products from marketplaces by
+      description: this endpoint provides filtering products from marketplaces with
         the best and minimum price
       parameters:
       - collectionFormat: ssv
         description: the exact query string
+        example: iphone+11
         in: query
         items:
           type: string
@@ -168,6 +171,7 @@ paths:
         type: array
       - collectionFormat: ssv
         description: the list of the markets using for search
+        example: megamarket+wildberries
         in: query
         items:
           enum:
@@ -195,7 +199,7 @@ paths:
         name: sort
         type: string
       - default: 1
-        description: the flag that defines 'do image links need to be parsed?'
+        description: the flag that defines 'Should image links be parsed?'
         enum:
         - 0
         - 1
@@ -231,14 +235,15 @@ paths:
             $ref: '#/definitions/chttp.ResponseErr'
       summary: best price filtering
       tags:
-      - Price-Filter
+      - Price-Filters
   /products/filter/price/exact-price:
     get:
-      description: this endpoint provides filtering products from marketplaces in
-        range (exact-price, exact-price * 1.05 (+5%))
+      description: this endpoint provides filtering products from marketplaces with
+        price in range (exact-price, exact-price * 1.05 (+5%))
       parameters:
       - collectionFormat: ssv
         description: the exact query string
+        example: iphone+11
         in: query
         items:
           type: string
@@ -254,6 +259,7 @@ paths:
         type: integer
       - collectionFormat: ssv
         description: the list of the markets using for search
+        example: megamarket+wildberries
         in: query
         items:
           enum:
@@ -281,7 +287,7 @@ paths:
         name: sort
         type: string
       - default: 1
-        description: the flag that defines 'do image links need to be parsed?'
+        description: the flag that defines 'Should image links be parsed??'
         enum:
         - 0
         - 1
@@ -315,16 +321,17 @@ paths:
           description: Bad Gateway
           schema:
             $ref: '#/definitions/chttp.ResponseErr'
-      summary: exact filtering
+      summary: exact price filtering
       tags:
-      - Price-Filter
+      - Price-Filters
   /products/filter/price/price-range:
     get:
-      description: this endpoint provides filtering products from marketplaces by
-        a specified price range
+      description: this endpoint provides filtering products from marketplaces with
+        specified price range
       parameters:
       - collectionFormat: ssv
         description: the exact query string
+        example: iphone+11
         in: query
         items:
           type: string
@@ -332,13 +339,13 @@ paths:
         name: query
         required: true
         type: array
-      - description: the price range's lower bound
+      - description: 'the price range''s lower bound: less than price_up'
         in: query
         minimum: 0
         name: price_down
         required: true
         type: integer
-      - description: the price range's upper bound
+      - description: 'the price range''s upper bound: more than price_down'
         in: query
         minimum: 1
         name: price_up
@@ -346,6 +353,7 @@ paths:
         type: integer
       - collectionFormat: ssv
         description: the list of the markets using for search
+        example: megamarket+wildberries
         in: query
         items:
           enum:
@@ -373,7 +381,7 @@ paths:
         name: sort
         type: string
       - default: 1
-        description: the flag that defines 'do image links need to be parsed?'
+        description: the flag that defines 'Should image links be parsed?'
         enum:
         - 0
         - 1
@@ -409,7 +417,7 @@ paths:
             $ref: '#/definitions/chttp.ResponseErr'
       summary: price range filtering
       tags:
-      - Price-Filter
+      - Price-Filters
 schemes:
 - http
 swagger: "2.0"

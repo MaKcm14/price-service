@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -73,11 +72,6 @@ func (c *Controller) configMW() {
 	c.contr.Use(middleware.BodyLimit("600K"))
 	c.contr.Use(middleware.Gzip())
 
-	c.contr.Use(middleware.GzipWithConfig(middleware.GzipConfig{
-		Skipper: func(c echo.Context) bool {
-			return strings.Contains(c.Request().URL.Path, "swagger")
-		}}))
-
 	c.contr.HTTPErrorHandler = func(err error, ctx echo.Context) {
 		if errHttp, flagCheck := err.(*echo.HTTPError); flagCheck {
 			if errHttp.Code == http.StatusNotFound {
@@ -107,18 +101,18 @@ func (c *Controller) setBasicHeaders(ctx echo.Context, buf []byte) {
 // handlePriceRangeRequest defines the logic of the handling the filter-by-price-down-up requests.
 //
 //	@summary		price range filtering
-//	@description	this endpoint provides filtering products from marketplaces by a specified price range
-//	@tags			Price-Filter
+//	@description	this endpoint provides filtering products from marketplaces with specified price range
+//	@tags			Price-Filters
 //	@produce		json
 //
-//	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)
-//	@param			price_down	query		integer		true	"the price range's lower bound"								minimum(0)
-//	@param			price_up	query		integer		true	"the price range's upper bound"								minimum(1)
-//	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)
-//	@param			sample		query		integer		false	"the num of products' sample"								minimum(1)									default(1)
-//	@param			sort		query		string		false	"the type of products' sample sorting"						Enums(popular, pricedown, priceup, newly)	default(popular)
-//	@param			no-image	query		integer		false	"the flag that defines 'do image links need to be parsed?'"	Enums(0, 1)									default(1)
-//	@param			amount		query		string		false	"the amount of the products in response's sample"			Enums(min, max)								default(min)
+//	@param			query		query		[]string	true	"the exact query string"								collectionFormat(ssv)	minLength(1)	example(iphone+11)
+//	@param			price_down	query		integer		true	"the price range's lower bound: less than price_up"		minimum(0)
+//	@param			price_up	query		integer		true	"the price range's upper bound: more than price_down"	minimum(1)
+//	@param			markets		query		[]string	true	"the list of the markets using for search"				Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)	example(megamarket+wildberries)
+//	@param			sample		query		integer		false	"the num of products' sample"							minimum(1)									default(1)
+//	@param			sort		query		string		false	"the type of products' sample sorting"					Enums(popular, pricedown, priceup, newly)	default(popular)
+//	@param			no-image	query		integer		false	"the flag that defines 'Should image links be parsed?'"	Enums(0, 1)									default(1)
+//	@param			amount		query		string		false	"the amount of the products in response's sample"		Enums(min, max)								default(min)
 //
 //
 //	@success		200			{object}	chttp.ProductResponse
@@ -176,16 +170,16 @@ func (c *Controller) handlePriceRangeRequest(ctx echo.Context) error {
 // handleBestPriceRequest defines the logic of the handling the filter-by-minimal-price requests.
 //
 //	@summary		best price filtering
-//	@description	this endpoint provides filtering products from marketplaces by the best and minimum price
-//	@tags			Price-Filter
+//	@description	this endpoint provides filtering products from marketplaces with the best and minimum price
+//	@tags			Price-Filters
 //	@produce		json
 //
-//	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)
-//	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)
-//	@param			sample		query		integer		false	"the num of products' sample"								minimum(1)									default(1)
-//	@param			sort		query		string		false	"the type of products' sample sorting"						Enums(popular, pricedown, priceup, newly)	default(popular)
-//	@param			no-image	query		integer		false	"the flag that defines 'do image links need to be parsed?'"	Enums(0, 1)									default(1)
-//	@param			amount		query		string		false	"the amount of the products in response's sample"			Enums(min, max)								default(min)
+//	@param			query		query		[]string	true	"the exact query string"								collectionFormat(ssv)						minLength(1)			example(iphone+11)
+//	@param			markets		query		[]string	true	"the list of the markets using for search"				Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)	example(megamarket+wildberries)
+//	@param			sample		query		integer		false	"the num of products' sample"							minimum(1)									default(1)
+//	@param			sort		query		string		false	"the type of products' sample sorting"					Enums(popular, pricedown, priceup, newly)	default(popular)
+//	@param			no-image	query		integer		false	"the flag that defines 'Should image links be parsed?'"	Enums(0, 1)									default(1)
+//	@param			amount		query		string		false	"the amount of the products in response's sample"		Enums(min, max)								default(min)
 //
 //
 //	@success		200			{object}	chttp.ProductResponse
@@ -234,17 +228,17 @@ func (c *Controller) handleBestPriceRequest(ctx echo.Context) error {
 
 // handleExactPriceRequest defines the logic of the handling the filter-by-set-price requests.
 //
-//	@summary		exact filtering
-//	@description	this endpoint provides filtering products from marketplaces in range (exact-price, exact-price * 1.05 (+5%))
-//	@tags			Price-Filter
+//	@summary		exact price filtering
+//	@description	this endpoint provides filtering products from marketplaces with price in range (exact-price, exact-price * 1.05 (+5%))
+//	@tags			Price-Filters
 //	@produce		json
 //
-//	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)
-//	@param			price		query		integer		true	"the value of exact price"								minimum(1)
-//	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)
+//	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)	example(iphone+11)
+//	@param			price		query		integer		true	"the value of exact price"									minimum(1)
+//	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)	example(megamarket+wildberries)
 //	@param			sample		query		integer		false	"the num of products' sample"								minimum(1)									default(1)
 //	@param			sort		query		string		false	"the type of products' sample sorting"						Enums(popular, pricedown, priceup, newly)	default(popular)
-//	@param			no-image	query		integer		false	"the flag that defines 'do image links need to be parsed?'"	Enums(0, 1)									default(1)
+//	@param			no-image	query		integer		false	"the flag that defines 'Should image links be parsed??'"	Enums(0, 1)									default(1)
 //	@param			amount		query		string		false	"the amount of the products in response's sample"			Enums(min, max)								default(min)
 //
 //
@@ -302,16 +296,16 @@ func (c *Controller) handleExactPriceRequest(ctx echo.Context) error {
 // handleMarketsRequest defines the logic of the handling the filter-by-markets requests.
 //
 //	@summary		common filtering
-//	@description	this endpoint provides filtering products from marketplaces without any specified filtration.
-//	@tags			Common-Filter
+//	@description	this endpoint provides filtering products from marketplaces without any specified filtration
+//	@tags			Common-Filters
 //	@produce		json
 //
-//	@param			query		query		[]string	true	"the exact query string"									collectionFormat(ssv)	minLength(1)
-//	@param			markets		query		[]string	true	"the list of the markets using for search"					Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)
-//	@param			sample		query		integer		false	"the num of products' sample"								minimum(1)									default(1)
-//	@param			sort		query		string		false	"the type of products' sample sorting"						Enums(popular, pricedown, priceup, newly)	default(popular)
-//	@param			no-image	query		integer		false	"the flag that defines 'do image links need to be parsed?'"	Enums(0, 1)									default(1)
-//	@param			amount		query		string		false	"the amount of the products in response's sample"			Enums(min, max)								default(min)
+//	@param			query		query		[]string	true	"the exact query string"								collectionFormat(ssv)						minLength(1)			example(iphone+11)
+//	@param			markets		query		[]string	true	"the list of the markets using for search"				Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)	example(megamarket+wildberries)
+//	@param			sample		query		integer		false	"the num of products' sample"							minimum(1)									default(1)
+//	@param			sort		query		string		false	"the type of products' sample sorting"					Enums(popular, pricedown, priceup, newly)	default(popular)
+//	@param			no-image	query		integer		false	"the flag that defines 'Should image links be parsed?'"	Enums(0, 1)									default(1)
+//	@param			amount		query		string		false	"the amount of the products in response's sample"		Enums(min, max)								default(min)
 //
 //
 //	@success		200			{object}	chttp.ProductResponse

@@ -133,7 +133,7 @@ If you set the wrong value of the parameters the service will use the *default v
   This parameter influences only on the some markets that parse with using the browser's driver. The next markets' parsers use it while the products' getting:
   - ***Wildberries*** 
 
-  Other parsers *don't use it*.
+  Other parsers *don't use it and ignore it*.
 
   <hr>
 

@@ -1,3 +1,3 @@
-time=2025-01-12T01:41:27.737+03:00 level=INFO msg="main application's configuring begun"
-time=2025-01-12T01:41:27.825+03:00 level=INFO msg="the app was STARTED"
-time=2025-01-12T01:41:27.825+03:00 level=INFO msg="configuring and starting the http-server begun"
+time=2025-01-12T11:21:43.714+03:00 level=INFO msg="main application's configuring begun"
+time=2025-01-12T11:21:43.795+03:00 level=INFO msg="the app was STARTED"
+time=2025-01-12T11:21:43.795+03:00 level=INFO msg="configuring and starting the http-server begun"

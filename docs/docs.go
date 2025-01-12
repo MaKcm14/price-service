@@ -24,12 +24,12 @@ const docTemplate = `{
     "paths": {
         "/products/filter/markets": {
             "get": {
-                "description": "this endpoint provides filtering products from marketplaces without any specified filtration.",
+                "description": "this endpoint provides filtering products from marketplaces without any specified filtration",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Common-Filter"
+                    "Common-Filters"
                 ],
                 "summary": "common filtering",
                 "parameters": [
@@ -40,6 +40,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "iphone+11",
                         "description": "the exact query string",
                         "name": "query",
                         "in": "query",
@@ -56,6 +57,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "megamarket+wildberries",
                         "description": "the list of the markets using for search",
                         "name": "markets",
                         "in": "query",
@@ -89,7 +91,7 @@ const docTemplate = `{
                         ],
                         "type": "integer",
                         "default": 1,
-                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "description": "the flag that defines 'Should image links be parsed?'",
                         "name": "no-image",
                         "in": "query"
                     },
@@ -135,12 +137,12 @@ const docTemplate = `{
         },
         "/products/filter/price/best-price": {
             "get": {
-                "description": "this endpoint provides filtering products from marketplaces by the best and minimum price",
+                "description": "this endpoint provides filtering products from marketplaces with the best and minimum price",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Price-Filter"
+                    "Price-Filters"
                 ],
                 "summary": "best price filtering",
                 "parameters": [
@@ -151,6 +153,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "iphone+11",
                         "description": "the exact query string",
                         "name": "query",
                         "in": "query",
@@ -167,6 +170,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "megamarket+wildberries",
                         "description": "the list of the markets using for search",
                         "name": "markets",
                         "in": "query",
@@ -200,7 +204,7 @@ const docTemplate = `{
                         ],
                         "type": "integer",
                         "default": 1,
-                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "description": "the flag that defines 'Should image links be parsed?'",
                         "name": "no-image",
                         "in": "query"
                     },
@@ -246,14 +250,14 @@ const docTemplate = `{
         },
         "/products/filter/price/exact-price": {
             "get": {
-                "description": "this endpoint provides filtering products from marketplaces in range (exact-price, exact-price * 1.05 (+5%))",
+                "description": "this endpoint provides filtering products from marketplaces with price in range (exact-price, exact-price * 1.05 (+5%))",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Price-Filter"
+                    "Price-Filters"
                 ],
-                "summary": "exact filtering",
+                "summary": "exact price filtering",
                 "parameters": [
                     {
                         "minLength": 1,
@@ -262,6 +266,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "iphone+11",
                         "description": "the exact query string",
                         "name": "query",
                         "in": "query",
@@ -286,6 +291,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "megamarket+wildberries",
                         "description": "the list of the markets using for search",
                         "name": "markets",
                         "in": "query",
@@ -319,7 +325,7 @@ const docTemplate = `{
                         ],
                         "type": "integer",
                         "default": 1,
-                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "description": "the flag that defines 'Should image links be parsed??'",
                         "name": "no-image",
                         "in": "query"
                     },
@@ -365,12 +371,12 @@ const docTemplate = `{
         },
         "/products/filter/price/price-range": {
             "get": {
-                "description": "this endpoint provides filtering products from marketplaces by a specified price range",
+                "description": "this endpoint provides filtering products from marketplaces with specified price range",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Price-Filter"
+                    "Price-Filters"
                 ],
                 "summary": "price range filtering",
                 "parameters": [
@@ -381,6 +387,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "iphone+11",
                         "description": "the exact query string",
                         "name": "query",
                         "in": "query",
@@ -389,7 +396,7 @@ const docTemplate = `{
                     {
                         "minimum": 0,
                         "type": "integer",
-                        "description": "the price range's lower bound",
+                        "description": "the price range's lower bound: less than price_up",
                         "name": "price_down",
                         "in": "query",
                         "required": true
@@ -397,7 +404,7 @@ const docTemplate = `{
                     {
                         "minimum": 1,
                         "type": "integer",
-                        "description": "the price range's upper bound",
+                        "description": "the price range's upper bound: more than price_down",
                         "name": "price_up",
                         "in": "query",
                         "required": true
@@ -413,6 +420,7 @@ const docTemplate = `{
                             "type": "string"
                         },
                         "collectionFormat": "ssv",
+                        "example": "megamarket+wildberries",
                         "description": "the list of the markets using for search",
                         "name": "markets",
                         "in": "query",
@@ -446,7 +454,7 @@ const docTemplate = `{
                         ],
                         "type": "integer",
                         "default": 1,
-                        "description": "the flag that defines 'do image links need to be parsed?'",
+                        "description": "the flag that defines 'Should image links be parsed?'",
                         "name": "no-image",
                         "in": "query"
                     },
@@ -590,12 +598,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0.0",
+	Version:          "0.9.0",
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
 	Title:            "Price Service API",
-	Description:      "This is a products' prices getting, filtering and monitoring.",
+	Description:      "This is a products' prices getting, filtering and monitoring API.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
