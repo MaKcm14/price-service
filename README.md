@@ -202,7 +202,6 @@ For more information about the API see the ***swagger-API-docs*** using the endp
 - Echo Go Framework
 - Flask Python Framework
 - Docker (*in-process*)
-- K8S (*in-process*)
 - Swagger 
 - Github Actions (*in-process*)
 

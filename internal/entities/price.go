@@ -7,7 +7,7 @@ type Price struct {
 }
 
 func NewPrice(basePrice, discPrice int) Price {
-	if basePrice <= 0 || discPrice <= 0 {
+	if basePrice <= 0 || discPrice <= 0 || basePrice < discPrice {
 		return Price{}
 	}
 
