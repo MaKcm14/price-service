@@ -19,7 +19,7 @@ func TestGetFiltersPositiveCases(t *testing.T) {
 	})
 }
 
-func TestExtremeCases(t *testing.T) {
+func TestGetFilterExtremeCases(t *testing.T) {
 	t.Run("Extreme: the filter's slice is nil", func(t *testing.T) {
 		var testConvertObj = api.URLConverter{}
 

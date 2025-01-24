@@ -12,6 +12,12 @@ const (
 	RateSort      SortType = "rate"
 )
 
+// PriceRangeRequest defines the request data specially for price-range filter.
+type PriceRangeRequest struct {
+	PriceDown int
+	PriceUp   int
+}
+
 // ProductRequest defines the request data from the client to this service.
 type ProductRequest struct {
 	Query       string
@@ -20,6 +26,9 @@ type ProductRequest struct {
 	Sort        SortType
 	FlagNoImage bool
 	Markets     []entities.Market
+
+	PriceRange PriceRangeRequest
+	ExactPrice int
 }
 
 func NewProductRequest() ProductRequest {

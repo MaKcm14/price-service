@@ -29,6 +29,18 @@ func TestNewPricePositiveCases(t *testing.T) {
 	})
 }
 
+func TestNewPriceExtremeCases(t *testing.T) {
+	t.Run("Extreme: the base price equals discount price", func(t *testing.T) {
+		testPriceObj := entities.NewPrice(10, 10)
+
+		assert.Equal(t, entities.Price{
+			BasePrice:     10,
+			DiscountPrice: 10,
+			Discount:      0,
+		}, testPriceObj)
+	})
+}
+
 func TestNewPriceNegativeAndExtremeCases(t *testing.T) {
 	type args struct {
 		basePrice int
@@ -44,11 +56,6 @@ func TestNewPriceNegativeAndExtremeCases(t *testing.T) {
 		{"Negative: the correct base price and the wrong discount price", args{10, 0}, entities.Price{}},
 		{"Negative: the wrong base and discount prices", args{0, 0}, entities.Price{}},
 		{"Negative: the base price is less than the discount price", args{10, 20}, entities.Price{}},
-		{"Extreme: the base price equals discount price", args{10, 10}, entities.Price{
-			BasePrice:     10,
-			DiscountPrice: 10,
-			Discount:      0,
-		}},
 	}
 
 	for _, tt := range tests {

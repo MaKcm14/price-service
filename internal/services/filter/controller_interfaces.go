@@ -13,9 +13,9 @@ type (
 	}
 
 	PriceFilterAdapter interface {
-		FilterByPriceRange(ctx echo.Context, request dto.ProductRequest, priceDown int, priceUp int) ([]entities.ProductSample, error)
+		FilterByPriceRange(ctx echo.Context, request dto.ProductRequest) ([]entities.ProductSample, error)
 		FilterByBestPrice(ctx echo.Context, request dto.ProductRequest) ([]entities.ProductSample, error)
-		FilterByExactPrice(ctx echo.Context, request dto.ProductRequest, exactPrice int) ([]entities.ProductSample, error)
+		FilterByExactPrice(ctx echo.Context, request dto.ProductRequest) ([]entities.ProductSample, error)
 	}
 
 	Filter interface {

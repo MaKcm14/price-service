@@ -131,16 +131,16 @@ func (m MegaMarketAPI) GetProducts(ctx echo.Context, request dto.ProductRequest)
 }
 
 // GetProductsByPriceRange gets the products with filter by price range.
-func (m MegaMarketAPI) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error) {
+func (m MegaMarketAPI) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
 	return m.getProducts(ctx, request, sortID, m.view.getSortParamURLView(string(request.Sort)),
-		priceRangeID, fmt.Sprintf("%d %d", priceDown, priceUp))
+		priceRangeID, fmt.Sprintf("%d %d", request.PriceRange.PriceDown, request.PriceRange.PriceUp))
 }
 
 // GetProductsByExactPrice gets the products with filter by price
 // in range [exactPrice, exactPrice + 10% off exactPrice].
-func (m MegaMarketAPI) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest, exactPrice int) (entities.ProductSample, error) {
+func (m MegaMarketAPI) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
 	return m.getProducts(ctx, request, sortID, m.view.getSortParamURLView(string(request.Sort)),
-		priceRangeID, fmt.Sprintf("%d %d", exactPrice, int(float32(exactPrice)*1.1)))
+		priceRangeID, fmt.Sprintf("%d %d", request.ExactPrice, int(float32(request.ExactPrice)*1.1)))
 }
 
 // GetProductsByBestPrice gets the products with filter by min price.

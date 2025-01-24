@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
+	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
 
@@ -144,7 +145,12 @@ func (c *Controller) handlePriceRangeRequest(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	products, err := c.filter.FilterByPriceRange(ctx, requestInfo, priceDown, priceUp)
+	requestInfo.PriceRange = dto.PriceRangeRequest{
+		PriceDown: priceDown,
+		PriceUp:   priceUp,
+	}
+
+	products, err := c.filter.FilterByPriceRange(ctx, requestInfo)
 
 	if err != nil {
 		c.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
@@ -271,7 +277,9 @@ func (c *Controller) handleExactPriceRequest(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{ErrRequestInfo.Error()})
 	}
 
-	products, err := c.filter.FilterByExactPrice(ctx, requestInfo, exactPrice)
+	requestInfo.ExactPrice = exactPrice
+
+	products, err := c.filter.FilterByExactPrice(ctx, requestInfo)
 
 	if err != nil {
 		c.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
