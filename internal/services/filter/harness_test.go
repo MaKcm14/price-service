@@ -34,14 +34,14 @@ func newMarketApiMock(market entities.Market, negativeInteraction bool) *marketA
 	}
 }
 
-func (s *marketApiMock) getProductsForPositiveCaseInteraction() (entities.ProductSample, error) {
+func (m *marketApiMock) getProductsForPositiveCaseInteraction() (entities.ProductSample, error) {
 	var marketStr string
 
-	if s.market == testMarket1 {
+	if m.market == testMarket1 {
 		marketStr = nameTestMarket1
-	} else if s.market == testMarket2 {
+	} else if m.market == testMarket2 {
 		marketStr = nameTestMarket2
-	} else if s.market == testMarket3 {
+	} else if m.market == testMarket3 {
 		marketStr = nameTestMarket3
 	}
 
@@ -51,37 +51,37 @@ func (s *marketApiMock) getProductsForPositiveCaseInteraction() (entities.Produc
 	}, nil
 }
 
-func (s *marketApiMock) getProductsForNegativeCaseInteraction() (entities.ProductSample, error) {
+func (m *marketApiMock) getProductsForNegativeCaseInteraction() (entities.ProductSample, error) {
 	return entities.ProductSample{}, fmt.Errorf("test error of the market's api interaction")
 }
 
-func (s *marketApiMock) GetProducts(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
-	s.Called(ctx, request)
+func (m *marketApiMock) GetProducts(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
+	m.Called(ctx, request)
 
-	if s.negativeInteraction {
-		return s.getProductsForNegativeCaseInteraction()
+	if m.negativeInteraction {
+		return m.getProductsForNegativeCaseInteraction()
 	}
 
-	return s.getProductsForPositiveCaseInteraction()
+	return m.getProductsForPositiveCaseInteraction()
 }
 
-func (s *marketApiMock) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
-	if s.negativeInteraction {
-		return s.getProductsForNegativeCaseInteraction()
+func (m *marketApiMock) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
+	if m.negativeInteraction {
+		return m.getProductsForNegativeCaseInteraction()
 	}
-	return s.getProductsForPositiveCaseInteraction()
+	return m.getProductsForPositiveCaseInteraction()
 }
 
-func (s *marketApiMock) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
-	if s.negativeInteraction {
-		return s.getProductsForNegativeCaseInteraction()
+func (m *marketApiMock) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
+	if m.negativeInteraction {
+		return m.getProductsForNegativeCaseInteraction()
 	}
-	return s.getProductsForPositiveCaseInteraction()
+	return m.getProductsForPositiveCaseInteraction()
 }
 
-func (s *marketApiMock) GetProductsWithBestPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
-	if s.negativeInteraction {
-		return s.getProductsForNegativeCaseInteraction()
+func (m *marketApiMock) GetProductsWithBestPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
+	if m.negativeInteraction {
+		return m.getProductsForNegativeCaseInteraction()
 	}
-	return s.getProductsForPositiveCaseInteraction()
+	return m.getProductsForPositiveCaseInteraction()
 }
