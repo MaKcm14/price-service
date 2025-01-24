@@ -61,11 +61,16 @@ func (v validator) validSample(ctx echo.Context, request *dto.ProductRequest) er
 
 // validMarkets validates the param "markets" that defines the markets where products will be searched.
 func (v validator) validMarkets(ctx echo.Context, request *dto.ProductRequest) error {
+	wildbFlag := false
+	mmegaFlag := false
+
 	for _, market := range strings.Split(ctx.QueryParam("markets"), " ") {
-		if market == "wildberries" {
+		if market == "wildberries" && !wildbFlag {
 			request.Markets = append(request.Markets, entities.Wildberries)
-		} else if market == "megamarket" {
+			wildbFlag = true
+		} else if market == "megamarket" && !mmegaFlag {
 			request.Markets = append(request.Markets, entities.MegaMarket)
+			mmegaFlag = true
 		}
 	}
 

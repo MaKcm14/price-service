@@ -66,6 +66,10 @@ func (v wildberriesViewer) getOpenApiPath(request dto.ProductRequest, filters []
 	var path string
 	filtersURL := v.converter.GetFilters(filters)
 
+	if len(filtersURL) == 0 {
+		return ""
+	}
+
 	path += fmt.Sprintf("%s=%d", pageID, request.Sample)
 	path += fmt.Sprintf("&%s=%s", sortID, filtersURL[sortID])
 
@@ -83,6 +87,10 @@ func (v wildberriesViewer) getOpenApiPath(request dto.ProductRequest, filters []
 func (v wildberriesViewer) getHiddenApiPath(request dto.ProductRequest, filters []string) string {
 	var path string
 	filtersURL := v.converter.GetFilters(filters)
+
+	if len(filtersURL) == 0 {
+		return ""
+	}
 
 	path += fmt.Sprintf("%s=%d", pageID, request.Sample)
 
@@ -132,7 +140,10 @@ func (p wildberriesParser) parseImageLinks(html string) []string {
 
 	for _, tag := range soup.HTMLParse(html).FindAll(mainProductsTagName) {
 		link := tag.Find("img", "class", imageClassName)
-		imageLinks = append(imageLinks, link.Attrs()["src"])
+
+		if link.Pointer != nil {
+			imageLinks = append(imageLinks, link.Attrs()["src"])
+		}
 	}
 
 	return imageLinks
