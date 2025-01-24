@@ -1,9 +1,0 @@
-mode: set
-github.com/MaKcm14/best-price-service/price-service/internal/entities/price.go:9.47,10.63 1 1
-github.com/MaKcm14/best-price-service/price-service/internal/entities/price.go:10.63,12.3 1 1
-github.com/MaKcm14/best-price-service/price-service/internal/entities/price.go:14.2,21.3 3 1
-github.com/MaKcm14/best-price-service/price-service/internal/entities/product.go:30.97,33.33 2 0
-github.com/MaKcm14/best-price-service/price-service/internal/entities/product.go:33.33,35.3 1 0
-github.com/MaKcm14/best-price-service/price-service/internal/entities/product.go:35.8,35.39 1 0
-github.com/MaKcm14/best-price-service/price-service/internal/entities/product.go:35.39,37.3 1 0
-github.com/MaKcm14/best-price-service/price-service/internal/entities/product.go:39.2,44.3 1 0

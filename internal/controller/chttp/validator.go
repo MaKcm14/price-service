@@ -31,7 +31,7 @@ func (c checker) isDataSafe(data string) bool {
 		}
 	}
 
-	if strings.Contains(data, "drop ") || strings.Contains(data, "union ") || strings.Contains(data, "--") {
+	if strings.Contains(data, "drop ") || (strings.Contains(data, "union ") && strings.Contains(data, "select")) || strings.Contains(data, "--") {
 		return false
 	}
 
