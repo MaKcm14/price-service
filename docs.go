@@ -1,4 +1,4 @@
-package chttp
+package price_service
 
 //	@title			Price Service API
 //	@version		0.9.0

@@ -27,7 +27,7 @@ type Service struct {
 }
 
 func NewService() Service {
-	mainLogFile, err := os.Create("../logs/price-service-main-logs.txt")
+	mainLogFile, err := os.Create("../../logs/price-service-main-logs.txt")
 
 	if err != nil {
 		panic(fmt.Sprintf("error of creating the main-log-file: %v", err))
