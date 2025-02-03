@@ -1,4 +1,4 @@
-import json
+import json, random
 from curl_cffi import requests
 
 MM_ORIGIN: str = "https://megamarket.ru"
@@ -96,18 +96,19 @@ class MegaMarketAPI:
 
 
     def __send_request(self, json_data):
-        resp = requests.post(url=MM_ORIGIN+PRODUCTS_PATH, json=json_data, verify=True, impersonate="chrome")
+        resp = requests.post(url=MM_ORIGIN+PRODUCTS_PATH, json=json_data, verify=False, 
+                impersonate=random.choice(["chrome119", "chrome120", "chrome123"]))
         body = json.loads(resp.text)
 
         try:
-            if not body["success"]:
+            if body.get("success") is not None and not body["success"]:
                 raise BaseException(self.__err_service_interaction)
 
         except AttributeError | TypeError:
             raise BaseException(self.__err_response_struct)
 
         except BaseException:
-            if body["code"] == 7:
+            if body.get("code") is not None and body["code"] == 7:
                 raise OverflowError(self.__err_service_limit)
             raise
 
@@ -149,8 +150,8 @@ class MegaMarketAPI:
         body = json.loads(resp.text)
 
         try:
-            if len(body["items"]) == 0:
-                if not body["success"]:
+            if body.get("items") is not None and len(body["items"]) == 0:
+                if body.get("success") is not None and not body["success"]:
                     raise BaseException(self.__err_service_interaction)
 
                 collection_id = body["processor"]["collectionId"]

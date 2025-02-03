@@ -97,7 +97,6 @@ func (w WildberriesAPI) getProductSample(url string) ([]wildberriesProduct, erro
 		resp, err := http.Get(url)
 
 		if err != nil || resp.StatusCode > 299 {
-			resp.Body.Close()
 			w.logger.Warn(fmt.Sprintf("error of the %v: %v: %v", serviceType, api.ErrServiceResponse, err))
 			return nil, fmt.Errorf("%w: %v", api.ErrServiceResponse, err)
 		}

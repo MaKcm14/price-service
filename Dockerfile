@@ -1,16 +1,38 @@
-FROM golang:1.23-alpine3.21
+# Creating the PE-app file.
+FROM golang:1.23-alpine3.21 AS builder
+
+LABEL maintainer="maksimacx50@gmail.com"
 
 WORKDIR /price-service
-
 COPY . .
-
-VOLUME /price-service/logs
 
 RUN go mod tidy
 
-WORKDIR /price-service/scripts/linux
+WORKDIR /price-service/cmd/app
+RUN go build main.go
+
+
+# Starting the installing.
+FROM chromedp/headless-shell:latest
+
+WORKDIR /cmd/app
+COPY --from=builder /price-service/cmd/app .
+
+WORKDIR /
+COPY --from=builder /price-service/.env .
+
+RUN apt-get update && \ 
+	apt-get install -y \
+	dumb-init \
+	ca-certificates \
+	xmlsec1 \
+	procps
+
+VOLUME /logs
 
 # DEBUG port: for checking its work
 EXPOSE 8080
 
-ENTRYPOINT [ "go", "run", "../../cmd/app/main.go" ]
+WORKDIR /cmd/app
+
+ENTRYPOINT [ "./main" ]
