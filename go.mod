@@ -1,6 +1,8 @@
 module github.com/MaKcm14/best-price-service/price-service
 
-go 1.23.1
+go 1.23
+
+toolchain go1.23.1
 
 require (
 	github.com/anaskhan96/soup v1.2.5

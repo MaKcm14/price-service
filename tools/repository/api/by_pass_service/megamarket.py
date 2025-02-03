@@ -101,12 +101,12 @@ class MegaMarketAPI:
 
         try:
             if not body["success"]:
-                raise Exception(self.__err_service_interaction)
+                raise BaseException(self.__err_service_interaction)
 
         except AttributeError | TypeError:
-            raise Exception(self.__err_response_struct)
+            raise BaseException(self.__err_response_struct)
 
-        except Exception:
+        except BaseException:
             if body["code"] == 7:
                 raise OverflowError(self.__err_service_limit)
             raise
@@ -116,32 +116,32 @@ class MegaMarketAPI:
 
     def get_products_json(self) -> str:
         json_data = {
-            "requestVersion":12,
-            "merchant":{},
-            "limit":44,
-            "offset": (self.__page - 1) * 44,
-            "isMultiCategorySearch":False,
-            "searchByOriginalQuery":False,
-            "selectedSuggestParams":[],
-            "expandedFiltersIds":[],
-            "sorting":self.__sort,
-            "ageMore18":None,
-            "showNotAvailable":self.__show_not_available,
-            "selectedFilters":[],
-            "searchText":self.__query,
-            "auth": AUTH
+            "requestVersion" : 12,
+            "merchant" : {},
+            "limit" : 44,
+            "offset" : (self.__page - 1) * 44,
+            "isMultiCategorySearch" : False,
+            "searchByOriginalQuery" : False,
+            "selectedSuggestParams" : [],
+            "expandedFiltersIds" : [],
+            "sorting": self.__sort,
+            "ageMore18" : None,
+            "showNotAvailable" : self.__show_not_available,
+            "selectedFilters" : [],
+            "searchText" : self.__query,
+            "auth" : AUTH
         }
 
         if self.__flag_price_filter:
             json_data["selectedFilters"] = [{
-                "filterId": FILTER_ID,
-                "type": 1,
-                "value": self.__price_range[0]
+                "filterId" : FILTER_ID,
+                "type" : 1,
+                "value" : self.__price_range[0]
             },
             {
-                "filterId": FILTER_ID,
-                "type": 2,
-                "value": self.__price_range[1]
+                "filterId" : FILTER_ID,
+                "type" : 2,
+                "value" : self.__price_range[1]
             },
             ]
 
@@ -151,7 +151,7 @@ class MegaMarketAPI:
         try:
             if len(body["items"]) == 0:
                 if not body["success"]:
-                    raise Exception(self.__err_service_interaction)
+                    raise BaseException(self.__err_service_interaction)
 
                 collection_id = body["processor"]["collectionId"]
 
@@ -163,7 +163,7 @@ class MegaMarketAPI:
                 resp = self.__send_request(json_data)
     
         except AttributeError | TypeError:
-            raise Exception(self.__err_response_struct)
+            raise BaseException(self.__err_response_struct)
 
         return resp.text
 

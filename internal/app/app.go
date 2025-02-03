@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -27,7 +29,10 @@ type Service struct {
 }
 
 func NewService() Service {
-	mainLogFile, err := os.Create("../../logs/price-service-main-logs.txt")
+	date := strings.Split(time.Now().String()[:19], " ")
+
+	mainLogFile, err := os.Create(fmt.Sprintf("../../logs/price-service-main-logs_%s___%s.txt",
+		date[0], strings.Join(strings.Split(date[1], ":"), "-")))
 
 	if err != nil {
 		panic(fmt.Sprintf("error of creating the main-log-file: %v", err))
@@ -37,7 +42,7 @@ func NewService() Service {
 
 	log.Info("main application's configuring begun")
 
-	appSet, err := config.NewSettings(log, config.Socket)
+	appSet, err := config.NewSettings(log, config.Socket, config.ByPassSocket)
 
 	if err != nil {
 		mainLogFile.Close()
@@ -52,7 +57,7 @@ func NewService() Service {
 				log,
 				map[entities.Market]services.ApiInteractor{
 					entities.Wildberries: wildb.NewWildberriesAPI(chrome.NewContext(), log, 1),
-					entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log),
+					entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log, appSet.ByPassSocket),
 				})),
 		logger:      log,
 		mainLogFile: mainLogFile,
