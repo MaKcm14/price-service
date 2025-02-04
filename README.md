@@ -19,7 +19,7 @@ The API-service was made as simple as possible for fast remembering the API-path
 It's recommended to use this service only into the **protected perimeter** (as local microservice ideally) 
 because it was developed as *the internal local service* that doesn't have the global protection from external web-attacks.
 
-*(If you're interested in the external API for this service see the api-gateway-service repo)*
+*This service is the server-side of the user service app that lets users to visualize the result of products analysis.*
 
 ### API
 
@@ -193,17 +193,30 @@ You can specified it as you want with the **extra-parameter_with_default_value**
 #### P.S.
 For more information about the API see the ***swagger-API-docs*** using the endpoint `/swagger`
 
-## How to use
-
 ## How to install
+
+### Installing the dependencies
+1. [Docker](https://docs.docker.com/engine/install/)
+2. Clone the project: `https://github.com/MaKcm14/price-service.git`
+
+### Starting the service
+1. At the root directory execute the command for starting:
+
+   - `docker-compose build`
+   - `docker-compose -d up`
+  
+If you want **to stop the service** execute the command  `docker-compose down` at the root directory.
+
+### P.S.
+If you want to use this service without the extra-user-service add the instruction `EXPOSE 8080` to the **Dockerfile** at the root directory and the `ports` at the **docker-compose.yml** .
 
 ## Technology stack
 
 - Echo Go Framework
 - Flask Python Framework
-- Docker (*in-process*)
-- K8S (*in-process*)
-- Swagger 
+- Docker
+- Swagger
+- Unit-Testing
 - Github Actions (*in-process*)
 
 ## P.S.

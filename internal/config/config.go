@@ -12,7 +12,8 @@ type SettingOpt func(*Settings, *slog.Logger) error
 
 // Settings sets the application's configurations.
 type Settings struct {
-	Socket string
+	Socket       string
+	ByPassSocket string
 }
 
 // configEnv gets ENV var. It returns the error if var is unset or unexisting.
@@ -28,7 +29,7 @@ func configEnv(key string, log *slog.Logger) (string, error) {
 	return env, nil
 }
 
-// Socket configs the Socket ENV.
+// Socket configs the Socket ENV defined the application's socket.
 func Socket(appSet *Settings, log *slog.Logger) error {
 	socket, err := configEnv("SOCKET", log)
 
@@ -40,9 +41,21 @@ func Socket(appSet *Settings, log *slog.Logger) error {
 	return nil
 }
 
+// ByPassSocket configs the ByPassSocket ENV defines the by-pass-service's socket.
+func ByPassSocket(appSet *Settings, log *slog.Logger) error {
+	socket, err := configEnv("BY_PASS_SOCKET", log)
+
+	if err != nil {
+		return err
+	}
+	appSet.ByPassSocket = socket
+
+	return nil
+}
+
 func NewSettings(log *slog.Logger, opts ...SettingOpt) (Settings, error) {
 	appSet := Settings{}
-	err := godotenv.Load("../.env")
+	err := godotenv.Load("../../.env")
 
 	if err != nil {
 		envErr := fmt.Errorf("error while loading the .env file (check it and try again): %v", err)

@@ -17,19 +17,21 @@ import (
 )
 
 type MegaMarketAPI struct {
-	logger *slog.Logger
-	ctx    context.Context
-	parser megaMarketParser
-	view   megaMarketViewer
+	logger       *slog.Logger
+	ctx          context.Context
+	parser       megaMarketParser
+	view         megaMarketViewer
+	byPassSocket string
 }
 
-func NewMegaMarketAPI(ctx context.Context, log *slog.Logger) MegaMarketAPI {
+func NewMegaMarketAPI(ctx context.Context, log *slog.Logger, socket string) MegaMarketAPI {
 	return MegaMarketAPI{
 		logger: log,
 		ctx:    ctx,
 		parser: megaMarketParser{
 			logger: log,
 		},
+		byPassSocket: socket,
 	}
 }
 
@@ -50,7 +52,7 @@ func (m MegaMarketAPI) getByPassProducts(ctx echo.Context, request dto.ProductRe
 		return nil, fmt.Errorf("error of processing the %v: %w", serviceType, api.ErrConnectionClosed)
 	}
 
-	resp, err := http.Post("http://localhost:8081/mmarket", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post(fmt.Sprintf("http://%s/mmarket", m.byPassSocket), "application/json", bytes.NewBuffer(requestBody))
 
 	if err != nil {
 		m.logger.Warn(fmt.Sprintf("error of the %s: %v", serviceType, err))
@@ -131,16 +133,16 @@ func (m MegaMarketAPI) GetProducts(ctx echo.Context, request dto.ProductRequest)
 }
 
 // GetProductsByPriceRange gets the products with filter by price range.
-func (m MegaMarketAPI) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error) {
+func (m MegaMarketAPI) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
 	return m.getProducts(ctx, request, sortID, m.view.getSortParamURLView(string(request.Sort)),
-		priceRangeID, fmt.Sprintf("%d %d", priceDown, priceUp))
+		priceRangeID, fmt.Sprintf("%d %d", request.PriceRange.PriceDown, request.PriceRange.PriceUp))
 }
 
 // GetProductsByExactPrice gets the products with filter by price
 // in range [exactPrice, exactPrice + 10% off exactPrice].
-func (m MegaMarketAPI) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest, exactPrice int) (entities.ProductSample, error) {
+func (m MegaMarketAPI) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
 	return m.getProducts(ctx, request, sortID, m.view.getSortParamURLView(string(request.Sort)),
-		priceRangeID, fmt.Sprintf("%d %d", exactPrice, int(float32(exactPrice)*1.1)))
+		priceRangeID, fmt.Sprintf("%d %d", request.ExactPrice, int(float32(request.ExactPrice)*1.1)))
 }
 
 // GetProductsByBestPrice gets the products with filter by min price.

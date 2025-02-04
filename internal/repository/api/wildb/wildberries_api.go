@@ -97,7 +97,6 @@ func (w WildberriesAPI) getProductSample(url string) ([]wildberriesProduct, erro
 		resp, err := http.Get(url)
 
 		if err != nil || resp.StatusCode > 299 {
-			resp.Body.Close()
 			w.logger.Warn(fmt.Sprintf("error of the %v: %v: %v", serviceType, api.ErrServiceResponse, err))
 			return nil, fmt.Errorf("%w: %v", api.ErrServiceResponse, err)
 		}
@@ -186,16 +185,16 @@ func (w WildberriesAPI) GetProducts(ctx echo.Context, request dto.ProductRequest
 }
 
 // GetProductsByPriceRange gets the products with filter by price range.
-func (w WildberriesAPI) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest, priceDown, priceUp int) (entities.ProductSample, error) {
+func (w WildberriesAPI) GetProductsWithPriceRange(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
 	return w.getProducts(ctx, request, sortID, string(request.Sort),
-		priceRangeID, w.view.getPriceRangeView(priceDown, priceUp))
+		priceRangeID, w.view.getPriceRangeView(request.PriceRange.PriceDown, request.PriceRange.PriceUp))
 }
 
 // GetProductsByExactPrice gets the products with filter by price
 // in range [exactPrice, exactPrice + 10% off exactPrice].
-func (w WildberriesAPI) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest, exactPrice int) (entities.ProductSample, error) {
+func (w WildberriesAPI) GetProductsWithExactPrice(ctx echo.Context, request dto.ProductRequest) (entities.ProductSample, error) {
 	return w.getProducts(ctx, request, sortID, string(request.Sort),
-		priceRangeID, w.view.getPriceRangeView(exactPrice, int(float32(exactPrice)*1.1)))
+		priceRangeID, w.view.getPriceRangeView(request.ExactPrice, int(float32(request.ExactPrice)*1.1)))
 }
 
 // GetProductsByBestPrice gets the products with filter by min price.

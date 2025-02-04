@@ -9,7 +9,7 @@ app = Flask(__name__)
 #   "sample": "sample_num",
 #   "sort": "sort_num",
 #   "show_not_available":flag,
-#   "is_price_filter_set": flag_filter_set
+#   "is_price_filter_set": flag_filter_set,
 #   "price_filter": {
 #       "price_down": "low_price_border",
 #       "price_up": "high_price_border",
@@ -30,9 +30,9 @@ def get_mmarket_products():
     except OverflowError as excp:
         return str({"error": excp.args[0]}), 502
 
-    except Exception as excp:
+    except BaseException as excp:
         return str({"error": excp.args[0]}), 500
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8081)
+    app.run(host="localhost", port=9090)

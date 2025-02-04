@@ -1,10 +1,10 @@
 try {
     ## Starting the auxiliary services.
     # Starting the by-pass-service.
-    $by_pass_service = Start-Process -PassThru -FilePath "python" -ArgumentList "../tools/repository/api/by_pass_service/server.py"
+    $by_pass_service = Start-Process -PassThru -FilePath "python" -ArgumentList "../../tools/repository/api/by_pass_service/server.py"
 
     ## Starting the main service.
-    $price_service = Start-Process -PassThru -FilePath "go" -ArgumentList "run", "../cmd/app/main.go"
+    $price_service = Start-Process -PassThru -FilePath "go" -ArgumentList "run", "../../cmd/app/main.go"
 
     $env:BY_PASS_SERVICE_ID=$by_pass_service.Id
     $env:PRICE_SERVICE_ID=$price_service.Id
