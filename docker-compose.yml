@@ -9,8 +9,9 @@ services:
         volumes:
           - price-service-volume:/logs
 
-        ports:
-          - 8080:8080
+        ### For using this microservice independently.
+        #ports:
+        #  - 8080:8080
 
 
     by-pass-service:
