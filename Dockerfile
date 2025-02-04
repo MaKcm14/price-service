@@ -16,7 +16,7 @@ RUN go build main.go
 FROM chromedp/headless-shell:latest
 
 WORKDIR /cmd/app
-COPY --from=builder /price-service/cmd/app .
+COPY --from=builder /price-service/cmd/app/main .
 
 WORKDIR /
 COPY --from=builder /price-service/.env .
@@ -29,9 +29,6 @@ RUN apt-get update && \
 	procps
 
 VOLUME /logs
-
-# DEBUG port: for checking its work
-EXPOSE 8080
 
 WORKDIR /cmd/app
 
