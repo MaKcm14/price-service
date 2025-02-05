@@ -208,7 +208,7 @@ For more information about the API see the ***swagger-API-docs*** using the endp
 If you want **to stop the service** execute the command  `docker-compose down` at the root directory.
 
 ### P.S.
-If you want to use this service without the extra-user-service add the instruction `EXPOSE 8080` to the **Dockerfile** at the root directory and the `ports` at the **docker-compose.yml** .
+If you want to use this service without the extra-user-service add the instruction `EXPOSE 8080` to the **Dockerfile** at the root directory and the `ports` in the **docker-compose.yml** to use it on `0.0.0.0:8080` of your host-machine.
 
 ## Technology stack
 
@@ -217,7 +217,6 @@ If you want to use this service without the extra-user-service add the instructi
 - Docker
 - Swagger
 - Unit-Testing
-- Github Actions (*in-process*)
 
 ## P.S.
 This service is the main microservice of the best-price-project
