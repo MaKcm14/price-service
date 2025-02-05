@@ -1,5 +1,4 @@
 services:
-
     price-service:
 
         container_name: price-service
