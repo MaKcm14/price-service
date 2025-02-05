@@ -219,4 +219,6 @@ If you want to use this service without the extra-user-service add the instructi
 - Unit-Testing
 
 ## P.S.
-This service is the main microservice of the best-price-project
+This service is the main microservice of the best-price-project.
+
+See the user-service to find more information.
