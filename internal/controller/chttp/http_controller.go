@@ -12,11 +12,11 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
-	"github.com/MaKcm14/best-price-service/price-service/internal/services"
-	"github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
+	"github.com/MaKcm14/price-service/internal/entities/dto"
+	"github.com/MaKcm14/price-service/internal/services"
+	"github.com/MaKcm14/price-service/internal/services/filter"
 
-	_ "github.com/MaKcm14/best-price-service/price-service/docs"
+	_ "github.com/MaKcm14/price-service/docs"
 )
 
 // Controller handles the clients' requests.

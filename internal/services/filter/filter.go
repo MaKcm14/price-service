@@ -6,9 +6,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
-	"github.com/MaKcm14/best-price-service/price-service/internal/services"
-	"github.com/MaKcm14/best-price-service/price-service/pkg/entities"
+	"github.com/MaKcm14/price-service/internal/entities/dto"
+	"github.com/MaKcm14/price-service/internal/services"
+	"github.com/MaKcm14/price-service/pkg/entities"
 )
 
 type filterType int

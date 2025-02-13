@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/MaKcm14/best-price-service/price-service/pkg/entities"
+import "github.com/MaKcm14/price-service/pkg/entities"
 
 type SortType string
 
