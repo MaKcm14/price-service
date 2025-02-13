@@ -11,12 +11,12 @@ import (
 
 	"github.com/MaKcm14/best-price-service/price-service/internal/config"
 	"github.com/MaKcm14/best-price-service/price-service/internal/controller/chttp"
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api/mmega"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api/wildb"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services"
 	"github.com/MaKcm14/best-price-service/price-service/internal/services/filter"
+	"github.com/MaKcm14/best-price-service/price-service/pkg/entities"
 )
 
 // Service unions every parts of the application.

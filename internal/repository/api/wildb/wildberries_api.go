@@ -12,7 +12,8 @@ import (
 	"github.com/chromedp/chromedp/kb"
 	"github.com/labstack/echo/v4"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities"
+	"github.com/MaKcm14/best-price-service/price-service/pkg/entities"
+
 	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
 	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
 )
