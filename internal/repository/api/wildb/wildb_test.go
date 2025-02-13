@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
+	"github.com/MaKcm14/price-service/internal/entities/dto"
 	"github.com/stretchr/testify/assert"
 )
 

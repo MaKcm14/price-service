@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
-	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
+	"github.com/MaKcm14/price-service/internal/entities/dto"
+	"github.com/MaKcm14/price-service/internal/repository/api"
 )
 
 // URL paths' consts.

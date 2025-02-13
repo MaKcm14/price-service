@@ -1,4 +1,4 @@
-module github.com/MaKcm14/best-price-service/price-service
+module github.com/MaKcm14/price-service
 
 go 1.23
 

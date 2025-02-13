@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/repository/api"
+	"github.com/MaKcm14/price-service/internal/repository/api"
 )
 
 func TestGetFiltersPositiveCases(t *testing.T) {

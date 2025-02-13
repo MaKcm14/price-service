@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/MaKcm14/best-price-service/price-service/internal/entities/dto"
-	"github.com/MaKcm14/best-price-service/price-service/pkg/entities"
+	"github.com/MaKcm14/price-service/internal/entities/dto"
+	"github.com/MaKcm14/price-service/pkg/entities"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

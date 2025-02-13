@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/MaKcm14/best-price-service/price-service/pkg/entities"
+	"github.com/MaKcm14/price-service/pkg/entities"
 )
 
 func TestNewPricePositiveCases(t *testing.T) {
