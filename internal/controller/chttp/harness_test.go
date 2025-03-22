@@ -79,3 +79,7 @@ func (m *productsFilterMock) FilterByExactPrice(ctx echo.Context, request dto.Pr
 
 	return m.getPositiveCaseSample(), nil
 }
+
+func (m *productsFilterMock) FilterByBestPriceAsync(ctx echo.Context, request dto.ProductRequest) {
+	m.Called(ctx, request)
+}

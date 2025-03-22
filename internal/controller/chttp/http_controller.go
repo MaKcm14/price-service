@@ -64,6 +64,7 @@ func (c *Controller) configPaths() {
 	c.contr.GET("/products/filter/price/best-price", c.handleBestPriceRequest)
 	c.contr.GET("/products/filter/price/exact-price", c.handleExactPriceRequest)
 	c.contr.GET("/products/filter/markets", c.handleMarketsRequest)
+	c.contr.POST("/products/filter/price/best-price/async", c.handleBestPriceAsyncRequest)
 
 	c.contr.GET("/swagger/*", echoSwagger.WrapHandler)
 }
@@ -359,4 +360,44 @@ func (c *Controller) handleMarketsRequest(ctx echo.Context) error {
 	ctx.Response().Header().Add("Cache-Control", "public, max-age=43200")
 
 	return ctx.JSON(http.StatusOK, response)
+}
+
+// handleBestPriceAsyncRequest defines the logic of handling the best-price request
+// with the async processing.
+//
+//	@summary		async best price filtering
+//	@description	this endpoint provides filtering products from marketplaces with the best and minimum price in async mode
+//	@tags			Price-Filters
+//	@produce		json
+//
+//	@param			query		query		[]string	true	"the exact query string"								collectionFormat(ssv)						minLength(1)			example(iphone+11)
+//	@param			markets		query		[]string	true	"the list of the markets using for search"				Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)	example(megamarket+wildberries)
+//	@param			sample		query		integer		false	"the num of products' sample"							minimum(1)									default(1)
+//	@param			sort		query		string		false	"the type of products' sample sorting"					Enums(popular, pricedown, priceup, newly)	default(popular)
+//	@param			no-image	query		integer		false	"the flag that defines 'Should image links be parsed?'"	Enums(0, 1)									default(1)
+//	@param			amount		query		string		false	"the amount of the products in response's sample"		Enums(min, max)								default(min)
+//
+//
+//	@success		200
+//	@failure		400			{object}	chttp.ResponseErr
+//	@router			/products/filter/price/best-price/async [post]
+func (c *Controller) handleBestPriceAsyncRequest(ctx echo.Context) error {
+	const filterType = "async-best-price-filter"
+
+	requestInfo, err := c.valid.validProductRequest(ctx,
+		c.valid.validQuery,
+		c.valid.validMarkets,
+		c.valid.validAmount,
+		c.valid.validSample,
+		c.valid.validNoImage,
+	)
+
+	go c.filter.FilterByBestPriceAsync(ctx, requestInfo)
+
+	if err != nil {
+		c.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
+		return ctx.JSON(http.StatusBadRequest, ResponseErr{err.Error()})
+	}
+
+	return ctx.JSON(http.StatusOK, nil)
 }

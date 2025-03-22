@@ -24,7 +24,7 @@ def get_mmarket_products():
         getter = MegaMarketAPI(body)
         return getter.get_products_json(), 200
 
-    except AttributeError | TypeError:
+    except (AttributeError,TypeError):
         return str({"error": "error of the request's structure"}), 400
 
     except OverflowError as excp:
