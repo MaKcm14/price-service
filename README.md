@@ -221,4 +221,4 @@ If you want to use this service without the extra-user-service add the instructi
 ## P.S.
 This service is the main microservice of the best-price-project.
 
-See the user-service to find more information.
+See the price-service-tg-bot to find more information about the UI for this service.

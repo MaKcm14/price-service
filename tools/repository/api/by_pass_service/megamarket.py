@@ -103,14 +103,11 @@ class MegaMarketAPI:
         try:
             if body.get("success") is not None and not body["success"]:
                 raise BaseException(self.__err_service_interaction)
-
-        except AttributeError | TypeError:
-            raise BaseException(self.__err_response_struct)
-
-        except BaseException:
-            if body.get("code") is not None and body["code"] == 7:
+            elif body.get("code") is not None and body["code"] == 7:
                 raise OverflowError(self.__err_service_limit)
-            raise
+
+        except (AttributeError,TypeError):
+            raise BaseException(self.__err_response_struct)
 
         return resp
 
@@ -163,7 +160,7 @@ class MegaMarketAPI:
 
                 resp = self.__send_request(json_data)
     
-        except AttributeError | TypeError:
+        except (AttributeError,TypeError):
             raise BaseException(self.__err_response_struct)
 
         return resp.text

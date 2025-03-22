@@ -114,3 +114,19 @@ func (p ProductsFilter) FilterByExactPrice(ctx echo.Context, request dto.Product
 	const serviceType = "filter.service.filter-by-exact-price"
 	return p.filter(ctx, request, serviceType, bestPriceFilter)
 }
+
+// FilterByBestPriceAsync defines the logic of getting and processing the products' sample in async format.
+func (p ProductsFilter) FilterByBestPriceAsync(ctx echo.Context, request dto.ProductRequest) {
+	const serviceType = "filter.service.async-filter-by-best-price"
+
+	request.Async = true
+	products, err := p.filter(ctx, request, serviceType, bestPriceFilter)
+
+	if err != nil {
+		p.logger.Error(fmt.Sprintf("error of the %s: %s", serviceType, err))
+		return
+	}
+
+	_ = products
+	// the function of returning the request's data to the Kafka.
+}

@@ -16,6 +16,7 @@ type (
 		FilterByPriceRange(ctx echo.Context, request dto.ProductRequest) ([]entities.ProductSample, error)
 		FilterByBestPrice(ctx echo.Context, request dto.ProductRequest) ([]entities.ProductSample, error)
 		FilterByExactPrice(ctx echo.Context, request dto.ProductRequest) ([]entities.ProductSample, error)
+		FilterByBestPriceAsync(ctx echo.Context, request dto.ProductRequest)
 	}
 
 	Filter interface {
