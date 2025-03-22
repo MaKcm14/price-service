@@ -22,6 +22,32 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/markets": {
+            "get": {
+                "description": "this endpoint provides getting the current markets that are supported by the service",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Service-Info"
+                ],
+                "summary": "markets getting",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/entities.MarketView"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/products/filter/markets": {
             "get": {
                 "description": "this endpoint provides filtering products from marketplaces without any specified filtration",
@@ -625,6 +651,17 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "RUB"
             ]
+        },
+        "entities.MarketView": {
+            "type": "object",
+            "properties": {
+                "emoji": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "entities.Price": {
             "type": "object",

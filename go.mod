@@ -7,6 +7,7 @@ toolchain go1.23.1
 require (
 	github.com/anaskhan96/soup v1.2.5
 	github.com/chromedp/chromedp v0.11.2
+	github.com/confluentinc/confluent-kafka-go/v2 v2.8.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/stretchr/testify v1.10.0

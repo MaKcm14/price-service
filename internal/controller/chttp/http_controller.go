@@ -15,6 +15,7 @@ import (
 	"github.com/MaKcm14/price-service/internal/entities/dto"
 	"github.com/MaKcm14/price-service/internal/services"
 	"github.com/MaKcm14/price-service/internal/services/filter"
+	"github.com/MaKcm14/price-service/pkg/entities"
 
 	_ "github.com/MaKcm14/price-service/docs"
 )
@@ -64,9 +65,11 @@ func (c *Controller) configPaths() {
 	c.contr.GET("/products/filter/price/best-price", c.handleBestPriceRequest)
 	c.contr.GET("/products/filter/price/exact-price", c.handleExactPriceRequest)
 	c.contr.GET("/products/filter/markets", c.handleMarketsRequest)
+
 	c.contr.POST("/products/filter/price/best-price/async", c.handleBestPriceAsyncRequest)
 
 	c.contr.GET("/swagger/*", echoSwagger.WrapHandler)
+	c.contr.GET("/api/markets", c.handleMarkets)
 }
 
 // configMW configurates the controller's middleware.
@@ -360,6 +363,20 @@ func (c *Controller) handleMarketsRequest(ctx echo.Context) error {
 	ctx.Response().Header().Add("Cache-Control", "public, max-age=43200")
 
 	return ctx.JSON(http.StatusOK, response)
+}
+
+// handleMarkets defines the logic of handling the markets request:
+// it returns the markets, that can be use for the search.
+//
+//	@summary		markets getting
+//	@description	this endpoint provides getting the current markets that are supported by the service
+//	@tags			Service-Info
+//	@produce		json
+//
+//	@success		200			{object}	map[string][]entities.MarketView
+//	@router			/api/markets [get]
+func (c *Controller) handleMarkets(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, entities.GetMarkets())
 }
 
 // handleBestPriceAsyncRequest defines the logic of handling the best-price request

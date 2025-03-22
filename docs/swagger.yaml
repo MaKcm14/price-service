@@ -18,6 +18,13 @@ definitions:
     type: string
     x-enum-varnames:
     - RUB
+  entities.MarketView:
+    properties:
+      emoji:
+        type: string
+      name:
+        type: string
+    type: object
   entities.Price:
     properties:
       base_price:
@@ -72,6 +79,24 @@ info:
   title: Price Service API
   version: 0.9.0
 paths:
+  /api/markets:
+    get:
+      description: this endpoint provides getting the current markets that are supported
+        by the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/entities.MarketView'
+              type: array
+            type: object
+      summary: markets getting
+      tags:
+      - Service-Info
   /products/filter/markets:
     get:
       description: this endpoint provides filtering products from marketplaces without

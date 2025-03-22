@@ -190,6 +190,20 @@ You can specified it as you want with the **extra-parameter_with_default_value**
 
   <hr>
 
+- `/products/filter/price/best-price/async?query={your_query}&sample={num}&markets={market_1}%20{market_2}%20...`
+
+  this API-path provides the calls for getting the products with the minimum price in the async mode
+  with getting through the Kafka.
+
+  <hr>
+
+- `/api/markets`
+
+  this API-path provides the calls for getting the current markets that are supported by this service.
+
+  <hr>
+
+
 #### P.S.
 For more information about the API see the ***swagger-API-docs*** using the endpoint `/swagger`
 
@@ -216,6 +230,7 @@ If you want to use this service without the extra-user-service add the instructi
 - Flask Python Framework
 - Docker
 - Swagger
+- Kafka
 - Unit-Testing
 
 ## P.S.
