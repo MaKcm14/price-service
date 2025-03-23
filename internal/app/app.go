@@ -14,6 +14,7 @@ import (
 	"github.com/MaKcm14/price-service/internal/repository/api"
 	"github.com/MaKcm14/price-service/internal/repository/api/mmega"
 	"github.com/MaKcm14/price-service/internal/repository/api/wildb"
+	"github.com/MaKcm14/price-service/internal/repository/kafka"
 	"github.com/MaKcm14/price-service/internal/services"
 	"github.com/MaKcm14/price-service/internal/services/filter"
 	"github.com/MaKcm14/price-service/pkg/entities"
@@ -23,6 +24,7 @@ import (
 type Service struct {
 	appContr    chttp.Controller
 	chrome      services.Driver
+	producer    services.AsyncWriter
 	logger      *slog.Logger
 	mainLogFile *os.File
 	appSet      config.Settings
@@ -42,7 +44,7 @@ func NewService() Service {
 
 	log.Info("main application's configuring begun")
 
-	appSet, err := config.NewSettings(log, config.Socket, config.ByPassSocket)
+	appSet, err := config.NewSettings(log, config.Socket, config.ByPassSocket, config.Brokers)
 
 	if err != nil {
 		mainLogFile.Close()
@@ -51,6 +53,13 @@ func NewService() Service {
 
 	chrome := api.NewChromePull()
 
+	producer, err := kafka.NewProducer(log, appSet.Brokers)
+
+	if err != nil {
+		mainLogFile.Close()
+		panic(err)
+	}
+
 	return Service{
 		appContr: chttp.NewController(echo.New(), log,
 			filter.New(
@@ -58,16 +67,18 @@ func NewService() Service {
 				map[entities.Market]services.ApiInteractor{
 					entities.Wildberries: wildb.NewWildberriesAPI(chrome.NewContext(), log, 1),
 					entities.MegaMarket:  mmega.NewMegaMarketAPI(chrome.NewContext(), log, appSet.ByPassSocket),
-				})),
+				}, producer)),
 		logger:      log,
 		mainLogFile: mainLogFile,
 		chrome:      chrome,
 		appSet:      appSet,
+		producer:    producer,
 	}
 }
 
 // Run starts the configured application.
 func (s Service) Run() {
+	defer s.producer.Close()
 	defer s.chrome.Close()
 	defer s.mainLogFile.Close()
 	defer s.logger.Info("the app was STOPPED")

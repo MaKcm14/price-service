@@ -1,5 +1,18 @@
-basePath: /
 definitions:
+  chttp.ExtraHeaders:
+    properties:
+      headers:
+        items:
+          $ref: '#/definitions/chttp.Header'
+        type: array
+    type: object
+  chttp.Header:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
   chttp.ProductResponse:
     properties:
       samples:
@@ -67,17 +80,8 @@ definitions:
           $ref: '#/definitions/entities.Product'
         type: array
     type: object
-host: localhost:8080
 info:
-  contact:
-    email: maksimacx50@gmail.com
-    name: API Support
-  description: This is a products' prices getting, filtering and monitoring API.
-  license:
-    name: Unlicense
-    url: https://unlicense.org/
-  title: Price Service API
-  version: 0.9.0
+  contact: {}
 paths:
   /api/markets:
     get:
@@ -321,6 +325,12 @@ paths:
         in: query
         name: amount
         type: string
+      - description: the headers that need to be included into the async response
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/chttp.ExtraHeaders'
       produces:
       - application/json
       responses:
@@ -515,6 +525,4 @@ paths:
       summary: price range filtering
       tags:
       - Price-Filters
-schemes:
-- http
 swagger: "2.0"

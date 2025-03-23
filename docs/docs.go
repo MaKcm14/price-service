@@ -9,14 +9,7 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {
-            "name": "API Support",
-            "email": "maksimacx50@gmail.com"
-        },
-        "license": {
-            "name": "Unlicense",
-            "url": "https://unlicense.org/"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -357,6 +350,15 @@ const docTemplate = `{
                         "description": "the amount of the products in response's sample",
                         "name": "amount",
                         "in": "query"
+                    },
+                    {
+                        "description": "the headers that need to be included into the async response",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ExtraHeaders"
+                        }
                     }
                 ],
                 "responses": {
@@ -624,6 +626,28 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "chttp.ExtraHeaders": {
+            "type": "object",
+            "properties": {
+                "headers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chttp.Header"
+                    }
+                }
+            }
+        },
+        "chttp.Header": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "chttp.ProductResponse": {
             "type": "object",
             "properties": {
@@ -733,12 +757,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.9.0",
-	Host:             "localhost:8080",
-	BasePath:         "/",
-	Schemes:          []string{"http"},
-	Title:            "Price Service API",
-	Description:      "This is a products' prices getting, filtering and monitoring API.",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
+	Schemes:          []string{},
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

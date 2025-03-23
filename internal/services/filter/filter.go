@@ -23,12 +23,15 @@ const (
 type ProductsFilter struct {
 	logger     *slog.Logger
 	marketsApi map[entities.Market]services.ApiInteractor
+
+	writer services.AsyncWriter
 }
 
-func New(log *slog.Logger, markets map[entities.Market]services.ApiInteractor) ProductsFilter {
+func New(log *slog.Logger, markets map[entities.Market]services.ApiInteractor, writer services.AsyncWriter) ProductsFilter {
 	return ProductsFilter{
 		logger:     log,
 		marketsApi: markets,
+		writer:     writer,
 	}
 }
 
@@ -127,6 +130,5 @@ func (p ProductsFilter) FilterByBestPriceAsync(ctx echo.Context, request dto.Pro
 		return
 	}
 
-	_ = products
-	// the function of returning the request's data to the Kafka.
+	p.writer.SendProductsMessage(products, request)
 }

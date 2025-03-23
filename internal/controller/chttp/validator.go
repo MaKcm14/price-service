@@ -118,9 +118,24 @@ func (v validator) validNoImage(ctx echo.Context, request *dto.ProductRequest) e
 	return nil
 }
 
+// validExtraHeaders validated the extra-headers for the async call.
+func (v validator) validExtraHeaders(ctx echo.Context, request *dto.ProductRequest) error {
+	headers := NewExtraHeaders()
+
+	if err := ctx.Bind(&headers); err != nil {
+		return ErrRequestInfo
+	}
+
+	for _, header := range headers.Headers {
+		request.Headers[header.Key] = header.Value
+	}
+
+	return nil
+}
+
 // validProductRequest validates the info from the URL-query's params.
 func (v validator) validProductRequest(ctx echo.Context, opts ...queryOpt) (dto.ProductRequest, error) {
-	var request dto.ProductRequest
+	request := dto.NewProductRequest()
 
 	for _, opt := range opts {
 		err := opt(ctx, &request)
