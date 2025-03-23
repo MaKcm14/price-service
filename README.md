@@ -166,11 +166,15 @@ You can specified it as you want with the **extra-parameter_with_default_value**
   
   this API-path provides the calls for getting the products filtered by the set price range.
 
+  `[GET]`
+
   <hr>
 
 - `/products/filter/price/best-price?query={your_query}&sample={num}&markets={market_1}%20{market_2}%20...`
 
   this API-path provides the calls for getting the products with the minimum price.
+
+  `[GET]`
 
   <hr>
 
@@ -182,11 +186,15 @@ You can specified it as you want with the **extra-parameter_with_default_value**
 
   `price` can be equal the values like `price_down` and `price_up` values.
 
+  `[GET]`
+
   <hr>
 
 - `/products/filter/markets?query={your_query}&sample={num}&markets={market_1}%20{market_2}%20...`
 
   this API-path provides the calls for getting the products from the markets without any specified filter.
+
+  `[GET]`
 
   <hr>
 
@@ -195,11 +203,38 @@ You can specified it as you want with the **extra-parameter_with_default_value**
   this API-path provides the calls for getting the products with the minimum price in the async mode
   with getting through the Kafka.
 
+  `[POST]:`
+
+  If you need to have the extra-headers (for identitification, for example) you have to add the next body to your request:
+
+  ```
+  {
+    "headers" : [
+      {
+        "key" : "key1",
+        "value" : "val1"
+      },
+      {
+        "key" : "key2",
+        "value" : "val2"
+      }
+    ]
+  }
+  ```
+
+  The response on the request will be with the next settings:
+
+  - Topic of response: `products`
+  - Value: `JSON-object of chttp.ProductResponse`
+  - Extra headers from the POST-request's body
+
   <hr>
 
 - `/api/markets`
 
   this API-path provides the calls for getting the current markets that are supported by this service.
+
+  `[GET]`
 
   <hr>
 
