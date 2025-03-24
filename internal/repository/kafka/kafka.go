@@ -25,6 +25,7 @@ func NewProducer(log *slog.Logger, brokers []string) (Producer, error) {
 
 	conf.Producer.Timeout = 2 * time.Second
 	conf.Producer.RequiredAcks = sarama.WaitForLocal
+	conf.Producer.Return.Successes = true
 
 	producer, err := sarama.NewSyncProducer(brokers, conf)
 
@@ -69,6 +70,10 @@ func (p Producer) SendProductsMessage(products []entities.ProductSample, request
 			time.Sleep(time.Millisecond * 50)
 		}
 	}
+
+	//DEBUG:
+	p.logger.Info(fmt.Sprintf("DEBUG: headers: %v\n%s\n\n", request.Headers, string(buf)))
+	//TODO: delete
 }
 
 // Close shuts down the producer and releases another resources.
