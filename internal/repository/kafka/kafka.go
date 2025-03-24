@@ -62,19 +62,10 @@ func (p Producer) SendProductsMessage(products []entities.ProductSample, request
 		Headers: recordHeaders,
 	}
 
-	var err error
 	count := 0
-	for ; (err != nil && count <= 5) || (err == nil && count == 0); count++ {
-		part, offset, err := p.producer.SendMessage(msg)
-		//DEBUG:
-		p.logger.Info(fmt.Sprintf("DEBUG: Topic: %s Partition: %d; Offset: %d", productsTopicName, part, offset))
-		p.logger.Info(fmt.Sprintf("DEBUG: headers: %v\n%s\n\n", request.Headers, string(buf)))
-		//TODO: delete
-
-		if err != nil {
-			p.logger.Warn(fmt.Sprintf("error of the %s: %s", op, err))
-			time.Sleep(time.Millisecond * 50)
-		}
+	for _, _, err := p.producer.SendMessage(msg); err != nil && count != 5; count++ {
+		p.logger.Warn(fmt.Sprintf("error of the %s: %s", op, err))
+		time.Sleep(time.Millisecond * 50)
 	}
 }
 
