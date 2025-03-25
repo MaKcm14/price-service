@@ -11,20 +11,20 @@ type ProductResponse struct {
 	Samples map[string]entities.ProductSample `json:"samples"`
 }
 
-// Header defines the header data.
-type Header struct {
+// header defines the header data.
+type header struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-// ExtraHeaders defines the extra-headers data for the async call.
-type ExtraHeaders struct {
-	Headers []Header `json:"headers"`
+// extraHeaders defines the extra-headers data for the async call.
+type extraHeaders struct {
+	Headers []header `json:"headers"`
 }
 
-func NewExtraHeaders() *ExtraHeaders {
-	return &ExtraHeaders{
-		Headers: make([]Header, 0, 100),
+func newExtraHeaders() *extraHeaders {
+	return &extraHeaders{
+		Headers: make([]header, 0, 100),
 	}
 }
 

@@ -23,7 +23,6 @@ func NewProducer(log *slog.Logger, brokers []string) (Producer, error) {
 
 	conf := sarama.NewConfig()
 
-	conf.Producer.Timeout = 2 * time.Second
 	conf.Producer.RequiredAcks = sarama.WaitForLocal
 	conf.Producer.Return.Successes = true
 
@@ -65,7 +64,7 @@ func (p Producer) SendProductsMessage(products []entities.ProductSample, request
 	count := 0
 	for _, _, err := p.producer.SendMessage(msg); err != nil && count != 5; count++ {
 		p.logger.Warn(fmt.Sprintf("error of the %s: %s", op, err))
-		time.Sleep(time.Millisecond * 50)
+		time.Sleep(time.Millisecond * 100)
 	}
 }
 

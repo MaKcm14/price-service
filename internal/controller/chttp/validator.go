@@ -120,7 +120,7 @@ func (v validator) validNoImage(ctx echo.Context, request *dto.ProductRequest) e
 
 // validExtraHeaders validated the extra-headers for the async call.
 func (v validator) validExtraHeaders(ctx echo.Context, request *dto.ProductRequest) error {
-	headers := NewExtraHeaders()
+	headers := newExtraHeaders()
 
 	if err := ctx.Bind(&headers); err != nil {
 		return ErrRequestInfo

@@ -29,13 +29,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/entities.MarketView"
-                                }
-                            }
+                            "$ref": "#/definitions/entities.SupportedMarkets"
                         }
                     }
                 }
@@ -748,6 +742,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entities.Product"
+                    }
+                }
+            }
+        },
+        "entities.SupportedMarkets": {
+            "type": "object",
+            "properties": {
+                "markets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.MarketView"
                     }
                 }
             }

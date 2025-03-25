@@ -373,10 +373,10 @@ func (c *Controller) handleMarketsRequest(ctx echo.Context) error {
 //	@tags			Service-Info
 //	@produce		json
 //
-//	@success		200	{object}	map[string][]entities.MarketView
+//	@success		200	{object}	entities.SupportedMarkets
 //	@router			/api/markets [get]
 func (c *Controller) handleMarkets(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK, entities.GetMarkets())
+	return ctx.JSON(http.StatusOK, entities.GetSupportedMarkets())
 }
 
 // handleBestPriceAsyncRequest defines the logic of handling the best-price request
@@ -409,6 +409,7 @@ func (c *Controller) handleBestPriceAsyncRequest(ctx echo.Context) error {
 		c.valid.validNoImage,
 		c.valid.validExtraHeaders,
 	)
+	requestInfo.Async = true
 
 	if err != nil {
 		c.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))

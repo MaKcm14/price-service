@@ -80,6 +80,13 @@ definitions:
           $ref: '#/definitions/entities.Product'
         type: array
     type: object
+  entities.SupportedMarkets:
+    properties:
+      markets:
+        items:
+          $ref: '#/definitions/entities.MarketView'
+        type: array
+    type: object
 info:
   contact: {}
 paths:
@@ -93,11 +100,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/entities.MarketView'
-              type: array
-            type: object
+            $ref: '#/definitions/entities.SupportedMarkets'
       summary: markets getting
       tags:
       - Service-Info
