@@ -127,7 +127,7 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request dto.ProductRequest
 	const serviceType = "wildberries.service.main-products-getter"
 	var products = make([]entities.Product, 0, 100)
 
-	if api.IsConnectionClosed(ctx) && !request.Async {
+	if !request.Async && api.IsConnectionClosed(ctx) {
 		w.logger.Warn(fmt.Sprintf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed))
 		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %w", serviceType, api.ErrConnectionClosed)
 	}
@@ -138,7 +138,7 @@ func (w WildberriesAPI) getProducts(ctx echo.Context, request dto.ProductRequest
 		return entities.ProductSample{}, err
 	}
 
-	if api.IsConnectionClosed(ctx) && !request.Async {
+	if !request.Async && api.IsConnectionClosed(ctx) {
 		w.logger.Warn(fmt.Sprintf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed))
 		return entities.ProductSample{}, fmt.Errorf("error of processing the %v: %w", serviceType, api.ErrConnectionClosed)
 	}

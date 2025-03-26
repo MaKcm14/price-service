@@ -2,8 +2,6 @@ package dto
 
 import "github.com/MaKcm14/price-service/pkg/entities"
 
-type SortType string
-
 const (
 	PopularSort   SortType = "popular"
 	PriceUpSort   SortType = "priceup"
@@ -11,6 +9,8 @@ const (
 	NewlySort     SortType = "newly"
 	RateSort      SortType = "rate"
 )
+
+type SortType string
 
 // PriceRangeRequest defines the request data specially for price-range filter.
 type PriceRangeRequest struct {

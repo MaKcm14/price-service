@@ -11,6 +11,18 @@ type ProductResponse struct {
 	Samples map[string]entities.ProductSample `json:"samples"`
 }
 
+func NewProductResponse(samples []entities.ProductSample) ProductResponse {
+	marketSamples := make(map[string]entities.ProductSample)
+
+	for _, sample := range samples {
+		marketSamples[strings.ToLower(sample.Market)] = sample
+	}
+
+	return ProductResponse{
+		Samples: marketSamples,
+	}
+}
+
 // header defines the header data.
 type header struct {
 	Key   string `json:"key"`
@@ -25,17 +37,5 @@ type extraHeaders struct {
 func newExtraHeaders() *extraHeaders {
 	return &extraHeaders{
 		Headers: make([]header, 0, 100),
-	}
-}
-
-func NewProductResponse(samples []entities.ProductSample) ProductResponse {
-	marketSamples := make(map[string]entities.ProductSample)
-
-	for _, sample := range samples {
-		marketSamples[strings.ToLower(sample.Market)] = sample
-	}
-
-	return ProductResponse{
-		Samples: marketSamples,
 	}
 }

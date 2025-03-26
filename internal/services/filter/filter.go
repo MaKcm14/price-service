@@ -11,8 +11,6 @@ import (
 	"github.com/MaKcm14/price-service/pkg/entities"
 )
 
-type filterType int
-
 const (
 	priceRangeFilter filterType = iota
 	exactPriceFilter
@@ -20,11 +18,12 @@ const (
 	commonFilter
 )
 
+type filterType int
+
 type ProductsFilter struct {
 	logger     *slog.Logger
 	marketsApi map[entities.Market]services.ApiInteractor
-
-	writer services.AsyncWriter
+	writer     services.AsyncWriter
 }
 
 func New(log *slog.Logger, markets map[entities.Market]services.ApiInteractor, writer services.AsyncWriter) ProductsFilter {

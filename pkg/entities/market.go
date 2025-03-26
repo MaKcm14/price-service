@@ -1,5 +1,11 @@
 package entities
 
+const (
+	Wildberries Market = iota
+	MegaMarket
+	NotExists
+)
+
 type Market int
 
 // MarketView defines the data structure of the concrete market.
@@ -13,13 +19,7 @@ type SupportedMarkets struct {
 	Markets []MarketView `json:"markets"`
 }
 
-const (
-	Wildberries Market = iota
-	MegaMarket
-	NotExists
-)
-
-// GetMarkets returns the current supported markets.
+// GetSupportedMarkets returns the current supported markets.
 func GetSupportedMarkets() SupportedMarkets {
 	return SupportedMarkets{
 		Markets: []MarketView{
