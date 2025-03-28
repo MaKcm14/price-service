@@ -11,8 +11,17 @@ import (
 
 type (
 	Driver interface {
+		Closer
 		NewContext() context.Context
+	}
+
+	Closer interface {
 		Close()
+	}
+
+	AsyncWriter interface {
+		Closer
+		SendProductsMessage(products []entities.ProductSample, request dto.ProductRequest)
 	}
 
 	CommonParser interface {

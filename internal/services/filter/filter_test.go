@@ -126,7 +126,7 @@ func (s *productsFilterTestSuite) TestFilterPositiveCaseOfFullMarketsHandling() 
 			testMarket1: s.mockTestMarket1,
 			testMarket2: s.mockTestMarket2,
 			testMarket3: s.mockTestMarket3,
-		},
+		}, nil,
 	)
 
 	testProdSample, err := testFilterObj.filter(nil, dto.ProductRequest{
@@ -164,7 +164,7 @@ func (s *productsFilterTestSuite) TestFilterExtremeCaseOfNotFullMarketsHandling(
 			testMarket1: s.mockTestMarket1,
 			testMarket2: s.mockTestMarket2,
 			testMarket3: s.mockTestMarket3,
-		},
+		}, nil,
 	)
 
 	testProdSample, err := testFilterObj.filter(nil, dto.ProductRequest{
@@ -194,7 +194,7 @@ func (s *productsFilterTestSuite) TestFilterFullNegativeMarketsApiInteraction() 
 			testMarket1: s.mockTestMarket1,
 			testMarket2: s.mockTestMarket2,
 			testMarket3: s.mockTestMarket3,
-		},
+		}, nil,
 	)
 
 	testProdSample, err := testFilterObj.filter(nil, dto.ProductRequest{
@@ -219,7 +219,7 @@ func (s *productsFilterTestSuite) TestFilterPartialNegativeMarketsApiInteraction
 			testMarket1: s.mockTestMarket1,
 			testMarket2: s.mockTestMarket2,
 			testMarket3: s.mockTestMarket3,
-		},
+		}, nil,
 	)
 
 	testProdSample, err := testFilterObj.filter(nil, dto.ProductRequest{

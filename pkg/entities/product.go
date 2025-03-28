@@ -1,10 +1,10 @@
 package entities
 
-type Currency string
-
 const (
 	RUB Currency = "rub"
 )
+
+type Currency string
 
 type ProductLink struct {
 	URL       string `json:"url"`

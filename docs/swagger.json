@@ -1,24 +1,29 @@
 {
-    "schemes": [
-        "http"
-    ],
     "swagger": "2.0",
     "info": {
-        "description": "This is a products' prices getting, filtering and monitoring API.",
-        "title": "Price Service API",
-        "contact": {
-            "name": "API Support",
-            "email": "maksimacx50@gmail.com"
-        },
-        "license": {
-            "name": "Unlicense",
-            "url": "https://unlicense.org/"
-        },
-        "version": "0.9.0"
+        "contact": {}
     },
-    "host": "localhost:8080",
-    "basePath": "/",
     "paths": {
+        "/api/markets": {
+            "get": {
+                "description": "this endpoint provides getting the current markets that are supported by the service",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Service-Info"
+                ],
+                "summary": "markets getting",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.SupportedMarkets"
+                        }
+                    }
+                }
+            }
+        },
         "/products/filter/markets": {
             "get": {
                 "description": "this endpoint provides filtering products from marketplaces without any specified filtration",
@@ -328,6 +333,15 @@
                         "description": "the amount of the products in response's sample",
                         "name": "amount",
                         "in": "query"
+                    },
+                    {
+                        "description": "the headers that need to be included into the async response",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ExtraHeaders"
+                        }
                     }
                 ],
                 "responses": {
@@ -595,6 +609,28 @@
         }
     },
     "definitions": {
+        "chttp.ExtraHeaders": {
+            "type": "object",
+            "properties": {
+                "headers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chttp.Header"
+                    }
+                }
+            }
+        },
+        "chttp.Header": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "chttp.ProductResponse": {
             "type": "object",
             "properties": {
@@ -622,6 +658,17 @@
             "x-enum-varnames": [
                 "RUB"
             ]
+        },
+        "entities.MarketView": {
+            "type": "object",
+            "properties": {
+                "emoji": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "entities.Price": {
             "type": "object",
@@ -684,6 +731,17 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/entities.Product"
+                    }
+                }
+            }
+        },
+        "entities.SupportedMarkets": {
+            "type": "object",
+            "properties": {
+                "markets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.MarketView"
                     }
                 }
             }

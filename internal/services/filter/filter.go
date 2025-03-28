@@ -11,8 +11,6 @@ import (
 	"github.com/MaKcm14/price-service/pkg/entities"
 )
 
-type filterType int
-
 const (
 	priceRangeFilter filterType = iota
 	exactPriceFilter
@@ -20,15 +18,20 @@ const (
 	commonFilter
 )
 
+type filterType int
+
+// ProductsFilter defines the logic of filtering the products.
 type ProductsFilter struct {
 	logger     *slog.Logger
 	marketsApi map[entities.Market]services.ApiInteractor
+	writer     services.AsyncWriter
 }
 
-func New(log *slog.Logger, markets map[entities.Market]services.ApiInteractor) ProductsFilter {
+func New(log *slog.Logger, markets map[entities.Market]services.ApiInteractor, writer services.AsyncWriter) ProductsFilter {
 	return ProductsFilter{
 		logger:     log,
 		marketsApi: markets,
+		writer:     writer,
 	}
 }
 
@@ -115,11 +118,12 @@ func (p ProductsFilter) FilterByExactPrice(ctx echo.Context, request dto.Product
 	return p.filter(ctx, request, serviceType, bestPriceFilter)
 }
 
-// FilterByBestPriceAsync defines the logic of getting and processing the products' sample in async format.
+// FilterByBestPriceAsync defines the logic of getting and processing the products' sample in async format
+// according to the logic of the best-price-filter when the products which are with the minimal price will be returned
+// through the kafka.
 func (p ProductsFilter) FilterByBestPriceAsync(ctx echo.Context, request dto.ProductRequest) {
 	const serviceType = "filter.service.async-filter-by-best-price"
 
-	request.Async = true
 	products, err := p.filter(ctx, request, serviceType, bestPriceFilter)
 
 	if err != nil {
@@ -127,6 +131,5 @@ func (p ProductsFilter) FilterByBestPriceAsync(ctx echo.Context, request dto.Pro
 		return
 	}
 
-	_ = products
-	// the function of returning the request's data to the Kafka.
+	p.writer.SendProductsMessage(products, request)
 }

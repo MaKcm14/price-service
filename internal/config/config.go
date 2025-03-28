@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -14,6 +15,7 @@ type SettingOpt func(*Settings, *slog.Logger) error
 type Settings struct {
 	Socket       string
 	ByPassSocket string
+	Brokers      []string
 }
 
 // configEnv gets ENV var. It returns the error if var is unset or unexisting.
@@ -49,6 +51,18 @@ func ByPassSocket(appSet *Settings, log *slog.Logger) error {
 		return err
 	}
 	appSet.ByPassSocket = socket
+
+	return nil
+}
+
+// Brokers configs the Brokers ENV defines the brokers' addresses in the kafka cluster.
+func Brokers(appSet *Settings, log *slog.Logger) error {
+	brokersList, err := configEnv("BROKERS", log)
+
+	if err != nil {
+		return err
+	}
+	appSet.Brokers = strings.Split(brokersList, " ")
 
 	return nil
 }

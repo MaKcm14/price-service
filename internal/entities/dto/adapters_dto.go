@@ -2,8 +2,6 @@ package dto
 
 import "github.com/MaKcm14/price-service/pkg/entities"
 
-type SortType string
-
 const (
 	PopularSort   SortType = "popular"
 	PriceUpSort   SortType = "priceup"
@@ -11,6 +9,8 @@ const (
 	NewlySort     SortType = "newly"
 	RateSort      SortType = "rate"
 )
+
+type SortType string
 
 // PriceRangeRequest defines the request data specially for price-range filter.
 type PriceRangeRequest struct {
@@ -27,7 +27,8 @@ type ProductRequest struct {
 	FlagNoImage bool
 	Markets     []entities.Market
 
-	Async bool
+	Async   bool
+	Headers map[string]string
 
 	PriceRange PriceRangeRequest
 	ExactPrice int
@@ -36,6 +37,7 @@ type ProductRequest struct {
 func NewProductRequest() ProductRequest {
 	return ProductRequest{
 		Markets: make([]entities.Market, 0, 15),
+		Headers: make(map[string]string),
 		Async:   false,
 	}
 }

@@ -22,3 +22,20 @@ func NewProductResponse(samples []entities.ProductSample) ProductResponse {
 		Samples: marketSamples,
 	}
 }
+
+// header defines the header data.
+type header struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// extraHeaders defines the extra-headers data for the async call.
+type extraHeaders struct {
+	Headers []header `json:"headers"`
+}
+
+func newExtraHeaders() *extraHeaders {
+	return &extraHeaders{
+		Headers: make([]header, 0, 100),
+	}
+}

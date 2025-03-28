@@ -47,7 +47,7 @@ func (m MegaMarketAPI) getByPassProducts(ctx echo.Context, request dto.ProductRe
 	)
 	requestBody, _ := json.Marshal(byPassRequest)
 
-	if api.IsConnectionClosed(ctx) && !request.Async {
+	if !request.Async && api.IsConnectionClosed(ctx) {
 		m.logger.Warn(fmt.Sprintf("error of processing the %v: %v", serviceType, api.ErrConnectionClosed))
 		return nil, fmt.Errorf("error of processing the %v: %w", serviceType, api.ErrConnectionClosed)
 	}

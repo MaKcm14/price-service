@@ -9,19 +9,32 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {
-            "name": "API Support",
-            "email": "maksimacx50@gmail.com"
-        },
-        "license": {
-            "name": "Unlicense",
-            "url": "https://unlicense.org/"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/markets": {
+            "get": {
+                "description": "this endpoint provides getting the current markets that are supported by the service",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Service-Info"
+                ],
+                "summary": "markets getting",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.SupportedMarkets"
+                        }
+                    }
+                }
+            }
+        },
         "/products/filter/markets": {
             "get": {
                 "description": "this endpoint provides filtering products from marketplaces without any specified filtration",
@@ -331,6 +344,15 @@ const docTemplate = `{
                         "description": "the amount of the products in response's sample",
                         "name": "amount",
                         "in": "query"
+                    },
+                    {
+                        "description": "the headers that need to be included into the async response",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/chttp.ExtraHeaders"
+                        }
                     }
                 ],
                 "responses": {
@@ -598,6 +620,28 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "chttp.ExtraHeaders": {
+            "type": "object",
+            "properties": {
+                "headers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chttp.Header"
+                    }
+                }
+            }
+        },
+        "chttp.Header": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "chttp.ProductResponse": {
             "type": "object",
             "properties": {
@@ -625,6 +669,17 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "RUB"
             ]
+        },
+        "entities.MarketView": {
+            "type": "object",
+            "properties": {
+                "emoji": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "entities.Price": {
             "type": "object",
@@ -690,18 +745,29 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "entities.SupportedMarkets": {
+            "type": "object",
+            "properties": {
+                "markets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.MarketView"
+                    }
+                }
+            }
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.9.0",
-	Host:             "localhost:8080",
-	BasePath:         "/",
-	Schemes:          []string{"http"},
-	Title:            "Price Service API",
-	Description:      "This is a products' prices getting, filtering and monitoring API.",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
+	Schemes:          []string{},
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

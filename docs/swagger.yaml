@@ -1,5 +1,18 @@
-basePath: /
 definitions:
+  chttp.ExtraHeaders:
+    properties:
+      headers:
+        items:
+          $ref: '#/definitions/chttp.Header'
+        type: array
+    type: object
+  chttp.Header:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
   chttp.ProductResponse:
     properties:
       samples:
@@ -18,6 +31,13 @@ definitions:
     type: string
     x-enum-varnames:
     - RUB
+  entities.MarketView:
+    properties:
+      emoji:
+        type: string
+      name:
+        type: string
+    type: object
   entities.Price:
     properties:
       base_price:
@@ -60,18 +80,30 @@ definitions:
           $ref: '#/definitions/entities.Product'
         type: array
     type: object
-host: localhost:8080
+  entities.SupportedMarkets:
+    properties:
+      markets:
+        items:
+          $ref: '#/definitions/entities.MarketView'
+        type: array
+    type: object
 info:
-  contact:
-    email: maksimacx50@gmail.com
-    name: API Support
-  description: This is a products' prices getting, filtering and monitoring API.
-  license:
-    name: Unlicense
-    url: https://unlicense.org/
-  title: Price Service API
-  version: 0.9.0
+  contact: {}
 paths:
+  /api/markets:
+    get:
+      description: this endpoint provides getting the current markets that are supported
+        by the service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.SupportedMarkets'
+      summary: markets getting
+      tags:
+      - Service-Info
   /products/filter/markets:
     get:
       description: this endpoint provides filtering products from marketplaces without
@@ -296,6 +328,12 @@ paths:
         in: query
         name: amount
         type: string
+      - description: the headers that need to be included into the async response
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/chttp.ExtraHeaders'
       produces:
       - application/json
       responses:
@@ -490,6 +528,4 @@ paths:
       summary: price range filtering
       tags:
       - Price-Filters
-schemes:
-- http
 swagger: "2.0"

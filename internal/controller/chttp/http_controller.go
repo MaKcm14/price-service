@@ -15,6 +15,7 @@ import (
 	"github.com/MaKcm14/price-service/internal/entities/dto"
 	"github.com/MaKcm14/price-service/internal/services"
 	"github.com/MaKcm14/price-service/internal/services/filter"
+	"github.com/MaKcm14/price-service/pkg/entities"
 
 	_ "github.com/MaKcm14/price-service/docs"
 )
@@ -64,9 +65,11 @@ func (c *Controller) configPaths() {
 	c.contr.GET("/products/filter/price/best-price", c.handleBestPriceRequest)
 	c.contr.GET("/products/filter/price/exact-price", c.handleExactPriceRequest)
 	c.contr.GET("/products/filter/markets", c.handleMarketsRequest)
+
 	c.contr.POST("/products/filter/price/best-price/async", c.handleBestPriceAsyncRequest)
 
 	c.contr.GET("/swagger/*", echoSwagger.WrapHandler)
+	c.contr.GET("/api/markets", c.handleMarkets)
 }
 
 // configMW configurates the controller's middleware.
@@ -362,6 +365,20 @@ func (c *Controller) handleMarketsRequest(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
+// handleMarkets defines the logic of handling the markets request:
+// it returns the markets, that can be use for the search.
+//
+//	@summary		markets getting
+//	@description	this endpoint provides getting the current markets that are supported by the service
+//	@tags			Service-Info
+//	@produce		json
+//
+//	@success		200	{object}	entities.SupportedMarkets
+//	@router			/api/markets [get]
+func (c *Controller) handleMarkets(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, entities.GetSupportedMarkets())
+}
+
 // handleBestPriceAsyncRequest defines the logic of handling the best-price request
 // with the async processing.
 //
@@ -370,16 +387,16 @@ func (c *Controller) handleMarketsRequest(ctx echo.Context) error {
 //	@tags			Price-Filters
 //	@produce		json
 //
-//	@param			query		query		[]string	true	"the exact query string"								collectionFormat(ssv)						minLength(1)			example(iphone+11)
-//	@param			markets		query		[]string	true	"the list of the markets using for search"				Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)	example(megamarket+wildberries)
-//	@param			sample		query		integer		false	"the num of products' sample"							minimum(1)									default(1)
-//	@param			sort		query		string		false	"the type of products' sample sorting"					Enums(popular, pricedown, priceup, newly)	default(popular)
-//	@param			no-image	query		integer		false	"the flag that defines 'Should image links be parsed?'"	Enums(0, 1)									default(1)
-//	@param			amount		query		string		false	"the amount of the products in response's sample"		Enums(min, max)								default(min)
-//
+//	@param			query		query	[]string			true	"the exact query string"								collectionFormat(ssv)						minLength(1)			example(iphone+11)
+//	@param			markets		query	[]string			true	"the list of the markets using for search"				Enums(wildberries, megamarket)				collectionFormat(ssv)	minLength(1)	example(megamarket+wildberries)
+//	@param			sample		query	integer				false	"the num of products' sample"							minimum(1)									default(1)
+//	@param			sort		query	string				false	"the type of products' sample sorting"					Enums(popular, pricedown, priceup, newly)	default(popular)
+//	@param			no-image	query	integer				false	"the flag that defines 'Should image links be parsed?'"	Enums(0, 1)									default(1)
+//	@param			amount		query	string				false	"the amount of the products in response's sample"		Enums(min, max)								default(min)
+//	@param			request		body	chttp.ExtraHeaders	true	"the headers that need to be included into the async response"
 //
 //	@success		200
-//	@failure		400			{object}	chttp.ResponseErr
+//	@failure		400	{object}	chttp.ResponseErr
 //	@router			/products/filter/price/best-price/async [post]
 func (c *Controller) handleBestPriceAsyncRequest(ctx echo.Context) error {
 	const filterType = "async-best-price-filter"
@@ -390,14 +407,16 @@ func (c *Controller) handleBestPriceAsyncRequest(ctx echo.Context) error {
 		c.valid.validAmount,
 		c.valid.validSample,
 		c.valid.validNoImage,
+		c.valid.validExtraHeaders,
 	)
-
-	go c.filter.FilterByBestPriceAsync(ctx, requestInfo)
+	requestInfo.Async = true
 
 	if err != nil {
 		c.logger.Warn(fmt.Sprintf("error of the %v: %v", filterType, err))
 		return ctx.JSON(http.StatusBadRequest, ResponseErr{err.Error()})
 	}
+
+	go c.filter.FilterByBestPriceAsync(ctx, requestInfo)
 
 	return ctx.JSON(http.StatusOK, nil)
 }

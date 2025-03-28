@@ -1,6 +1,5 @@
 services:
     price-service:
-
         container_name: price-service
 
         build: .
@@ -14,7 +13,6 @@ services:
 
 
     by-pass-service:
-
         container_name: by-pass-service
 
         build: ./tools/repository/api/by_pass_service
