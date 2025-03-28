@@ -1,7 +1,7 @@
 package price_service
 
 //	@title			Price Service API
-//	@version		0.9.0
+//	@version		1.3.0
 //	@description	This is a products' prices getting, filtering and monitoring API.
 
 //	@contact.name	API Support
@@ -10,8 +10,8 @@ package price_service
 //	@license.name	Unlicense
 //	@license.url	https://unlicense.org/
 
-//	@host		localhost:8080
+//	@host		0.0.0.0:8080
 //	@BasePath	/
 
 //	@schemes	http
-//	@tags		Price-Filters,Common-Filters
+//	@tags		Price-Filters,Common-Filters, Service-Info

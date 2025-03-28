@@ -20,6 +20,7 @@ const (
 
 type filterType int
 
+// ProductsFilter defines the logic of filtering the products.
 type ProductsFilter struct {
 	logger     *slog.Logger
 	marketsApi map[entities.Market]services.ApiInteractor
