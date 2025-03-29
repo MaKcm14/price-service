@@ -1,18 +1,4 @@
 definitions:
-  chttp.ExtraHeaders:
-    properties:
-      headers:
-        items:
-          $ref: '#/definitions/chttp.Header'
-        type: array
-    type: object
-  chttp.Header:
-    properties:
-      key:
-        type: string
-      value:
-        type: string
-    type: object
   chttp.ProductResponse:
     properties:
       samples:
@@ -23,6 +9,20 @@ definitions:
   chttp.ResponseErr:
     properties:
       error:
+        type: string
+    type: object
+  chttp.extraHeaders:
+    properties:
+      headers:
+        items:
+          $ref: '#/definitions/chttp.header'
+        type: array
+    type: object
+  chttp.header:
+    properties:
+      key:
+        type: string
+      value:
         type: string
     type: object
   entities.Currency:
@@ -333,7 +333,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/chttp.ExtraHeaders'
+          $ref: '#/definitions/chttp.extraHeaders'
       produces:
       - application/json
       responses:

@@ -203,24 +203,9 @@ You can specified it as you want with the **extra-parameter_with_default_value**
   this API-path provides the calls for getting the products with the minimum price in the async mode
   with getting through the Kafka.
 
-  `[POST]:`
+  `[POST]`
 
-  If you need to have the extra-headers (for identitification, for example) you have to add the next body to your request:
-
-  ```
-  {
-    "headers" : [
-      {
-        "key" : "key1",
-        "value" : "val1"
-      },
-      {
-        "key" : "key2",
-        "value" : "val2"
-      }
-    ]
-  }
-  ```
+  If you need to have the extra-headers (for identitification, for example) you have to add the body to your request.
 
   The response on the request will be with the next settings:
 
@@ -243,21 +228,24 @@ You can specified it as you want with the **extra-parameter_with_default_value**
 For more information about the API see the ***swagger-API-docs*** using the endpoint `/swagger`
 
 ## How to install
+This service is a part of the **best-price-project**. It must starts with other services.
 
-### Installing the dependencies
-1. [Docker](https://docs.docker.com/engine/install/)
-2. Clone the project: `https://github.com/MaKcm14/price-service.git`
+For a simpler installation and setup process, refer to the [best-price-project-deployment](https://github.com/MaKcm14/best-price-project-deployment) guide.
 
-### Starting the service
-1. At the root directory execute the command for starting:
+But if you need to use this service **independently** you must configure the kafka's cluster and start it using the docker compose.
 
-   - `docker-compose build`
-   - `docker-compose -d up`
-  
-If you want **to stop the service** execute the command  `docker-compose down` at the root directory.
+### Configuring the .env file:
+At the root directory you can find .env file that sets the default settings of this service. Here you can find some description about the .env file's params:
 
-### P.S.
-If you want to use this service without the extra-user-service add the instruction `EXPOSE 8080` to the **Dockerfile** at the root directory and the `ports` in the **docker-compose.yml** to use it on `0.0.0.0:8080` of your host-machine.
+```
+SOCKET="your_socket_that_will_use_for_starting_this_service"
+BY_PASS_SOCKET="localhost:9090"
+BROKERS="your_kafka_brokers'_sockets_divided_by_space_(bootstrap_list)"
+```
+You can customize it.
+
+#### Note:
+This .env file has default settings **specially for use it with the price-service UI**. 
 
 ## Technology stack
 
@@ -271,4 +259,6 @@ If you want to use this service without the extra-user-service add the instructi
 ## P.S.
 This service is the main microservice of the best-price-project.
 
-See the price-service-tg-bot to find more information about the UI for this service.
+See the [price-service-tg-bot](https://github.com/MaKcm14/price-service-tg-bot) to find more information about the UI for this service.
+
+See the [best-price-project-deployment](https://github.com/MaKcm14/best-price-project-deployment) to find more information about how to configure this service with the UI service.

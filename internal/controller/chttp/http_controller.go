@@ -393,7 +393,7 @@ func (c *Controller) handleMarkets(ctx echo.Context) error {
 //	@param			sort		query	string				false	"the type of products' sample sorting"					Enums(popular, pricedown, priceup, newly)	default(popular)
 //	@param			no-image	query	integer				false	"the flag that defines 'Should image links be parsed?'"	Enums(0, 1)									default(1)
 //	@param			amount		query	string				false	"the amount of the products in response's sample"		Enums(min, max)								default(min)
-//	@param			request		body	chttp.ExtraHeaders	true	"the headers that need to be included into the async response"
+//	@param			request		body	chttp.extraHeaders	true	"the headers that need to be included into the async response"
 //
 //	@success		200
 //	@failure		400	{object}	chttp.ResponseErr

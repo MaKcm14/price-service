@@ -351,7 +351,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/chttp.ExtraHeaders"
+                            "$ref": "#/definitions/chttp.extraHeaders"
                         }
                     }
                 ],
@@ -620,28 +620,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "chttp.ExtraHeaders": {
-            "type": "object",
-            "properties": {
-                "headers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/chttp.Header"
-                    }
-                }
-            }
-        },
-        "chttp.Header": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            }
-        },
         "chttp.ProductResponse": {
             "type": "object",
             "properties": {
@@ -657,6 +635,28 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "chttp.extraHeaders": {
+            "type": "object",
+            "properties": {
+                "headers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/chttp.header"
+                    }
+                }
+            }
+        },
+        "chttp.header": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
                     "type": "string"
                 }
             }
