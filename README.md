@@ -261,3 +261,5 @@ If you need to use it **independently** you must configure the kafka's cluster.
 This service is the main microservice of the best-price-project.
 
 See the [price-service-tg-bot](https://github.com/MaKcm14/price-service-tg-bot) to find more information about the UI for this service.
+
+See the [best-price-project-deployment](https://github.com/MaKcm14/best-price-project-deployment) to find more information about how to configure this service with the UI service.
