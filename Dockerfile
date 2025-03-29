@@ -31,7 +31,7 @@ RUN apt-get update && \
 VOLUME /logs
 
 ### For using this microservice independently.
-EXPOSE 8080
+# EXPOSE 8080
 
 WORKDIR /cmd/app
 
