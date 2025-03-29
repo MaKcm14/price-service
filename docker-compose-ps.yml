@@ -7,11 +7,6 @@ services:
         volumes:
           - price-service-volume:/logs
 
-        ### For using this microservice independently.
-        # ports:
-        #  - 8080:8080
-
-
     by-pass-service:
         container_name: by-pass-service
 
