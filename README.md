@@ -228,10 +228,11 @@ You can specified it as you want with the **extra-parameter_with_default_value**
 For more information about the API see the ***swagger-API-docs*** using the endpoint `/swagger`
 
 ## How to install
+This service is a part of the **best-price-project**. It must starts with other services.
 
-### Installing the dependencies
-1. [Docker](https://docs.docker.com/engine/install/)
-2. Clone the project: `https://github.com/MaKcm14/price-service.git`
+For a simpler installation and setup process, refer to the [best-price-project-deployment](https://github.com/MaKcm14/best-price-project-deployment) guide.
+
+But if you need to use this service **independently** you must configure the kafka's cluster and start it using the docker compose.
 
 ### Configuring the .env file:
 At the root directory you can find .env file that sets the default settings of this service. Here you can find some description about the .env file's params:
@@ -244,9 +245,7 @@ BROKERS="your_kafka_brokers'_sockets_divided_by_space_(bootstrap_list)"
 You can customize it.
 
 #### Note:
-This .env **file has default settings specially for use it with the price-service UI**. 
-
-If you need to use it **independently** you must configure the kafka's cluster.
+This .env file has default settings **specially for use it with the price-service UI**. 
 
 ## Technology stack
 
