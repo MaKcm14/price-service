@@ -203,24 +203,9 @@ You can specified it as you want with the **extra-parameter_with_default_value**
   this API-path provides the calls for getting the products with the minimum price in the async mode
   with getting through the Kafka.
 
-  `[POST]:`
+  `[POST]`
 
-  If you need to have the extra-headers (for identitification, for example) you have to add the next body to your request:
-
-  ```
-  {
-    "headers" : [
-      {
-        "key" : "key1",
-        "value" : "val1"
-      },
-      {
-        "key" : "key2",
-        "value" : "val2"
-      }
-    ]
-  }
-  ```
+  If you need to have the extra-headers (for identitification, for example) you have to add the body to your request.
 
   The response on the request will be with the next settings:
 
@@ -248,16 +233,20 @@ For more information about the API see the ***swagger-API-docs*** using the endp
 1. [Docker](https://docs.docker.com/engine/install/)
 2. Clone the project: `https://github.com/MaKcm14/price-service.git`
 
-### Starting the service
-1. At the root directory execute the command for starting:
+### Configuring the .env file:
+At the root directory you can find .env file that sets the default settings of this service. Here you can find some description about the .env file's params:
 
-   - `docker-compose build`
-   - `docker-compose -d up`
-  
-If you want **to stop the service** execute the command  `docker-compose down` at the root directory.
+```
+SOCKET="your_socket_that_will_use_for_starting_this_service"
+BY_PASS_SOCKET="localhost:9090"
+BROKERS="your_kafka_brokers'_sockets_divided_by_space_(bootstrap_list)"
+```
+You can customize it.
 
-### P.S.
-If you want to use this service without the extra-user-service add the instruction `EXPOSE 8080` to the **Dockerfile** at the root directory and the `ports` in the **docker-compose.yml** to use it on `0.0.0.0:8080` of your host-machine.
+#### Note:
+This .env **file has default settings specially for use it with the price-service UI**. 
+
+If you need to use it **independently** you must configure the kafka's cluster.
 
 ## Technology stack
 
@@ -271,4 +260,4 @@ If you want to use this service without the extra-user-service add the instructi
 ## P.S.
 This service is the main microservice of the best-price-project.
 
-See the price-service-tg-bot to find more information about the UI for this service.
+See the [price-service-tg-bot](https://github.com/MaKcm14/price-service-tg-bot) to find more information about the UI for this service.
