@@ -200,14 +200,13 @@ You can specified it as you want with the **extra-parameter_with_default_value**
 
 - `/products/filter/price/best-price/async?query={your_query}&sample={num}&markets={market_1}%20{market_2}%20...`
 
-  this API-path provides the calls for getting the products with the minimum price in the async mode
-  with getting through the Kafka.
+  this API-path provides the calls for getting the products with the minimum price in the async mode through the Kafka.
 
   `[POST]`
 
   If you need to have the extra-headers (for identitification, for example) you have to add the body to your request.
 
-  The response on the request will be with the next settings:
+  The response on the request is in the next view:
 
   - Topic of response: `products`
   - Value: `JSON-object of chttp.ProductResponse`
@@ -228,7 +227,7 @@ You can specified it as you want with the **extra-parameter_with_default_value**
 For more information about the API see the ***swagger-API-docs*** using the endpoint `/swagger`
 
 ## How to install
-This service is a part of the **best-price-project**. It must starts with other services.
+This service is a part of the **best-price-project**. It must starts with the other services.
 
 For a simpler installation and setup process, refer to the [best-price-project-deployment](https://github.com/MaKcm14/best-price-project-deployment) guide.
 
@@ -245,7 +244,7 @@ BROKERS="your_kafka_brokers'_sockets_divided_by_space_(bootstrap_list)"
 You can customize it.
 
 #### Note:
-This .env file has default settings **specially for use it with the price-service UI**. 
+This .env file has default settings **specially for using with the price-service UI**. 
 
 ## Technology stack
 
