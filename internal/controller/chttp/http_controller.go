@@ -1,12 +1,17 @@
 package chttp
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -37,20 +42,34 @@ func NewController(contr *echo.Echo, logger *slog.Logger, filter filter.Filter) 
 }
 
 // Run configures and starts the http-server.
-func (с Controller) Run(socket string) {
-	defer с.logger.Info("the http-server was stopped")
-	defer с.contr.Close()
+func (c *Controller) Run(socket string) {
+	defer c.logger.Info("the http-server was stopped")
+	defer c.contr.Close()
 
-	с.logger.Info("configuring and starting the http-server begun")
+	c.logger.Info("configuring and starting the http-server begun")
 
-	с.configController()
-	err := с.contr.Start(socket)
+	c.configController()
+	go func() {
+		if err := c.contr.Start(socket); err != nil {
+			serverErr := fmt.Errorf("http-server wasn't started: %v", err)
+			c.logger.Error(serverErr.Error())
+			panic(serverErr)
+		}
+	}()
 
-	if err != nil {
-		serverErr := fmt.Errorf("http-server wasn't started: %v", err)
-		с.logger.Error(serverErr.Error())
-		panic(serverErr)
+	sig := make(chan os.Signal, 3)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+
+	<-sig
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
+
+	if err := c.contr.Shutdown(ctx); err != nil {
+		c.logger.Error(fmt.Sprintf("error of gracefully shutdown the server: %v", err))
 	}
+
+	c.logger.Info("server was gracefully stopped")
 }
 
 // configController configurates the controller by setting the middlewares and paths.
