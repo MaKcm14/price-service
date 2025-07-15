@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -78,11 +80,17 @@ func NewService() Service {
 
 // Run starts the configured application.
 func (s Service) Run() {
+	defer s.mainLogFile.Close()
 	defer s.producer.Close()
 	defer s.chrome.Close()
-	defer s.mainLogFile.Close()
 	defer s.logger.Info("the app was STOPPED")
+	defer s.appContr.GracefulStop()
 
 	s.logger.Info("the app was STARTED")
-	s.appContr.Run(s.appSet.Socket)
+	go s.appContr.Run(s.appSet.Socket)
+
+	sig := make(chan os.Signal, 3)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+
+	<-sig
 }

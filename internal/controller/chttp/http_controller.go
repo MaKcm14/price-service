@@ -7,10 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
-	"os/signal"
 	"strconv"
-	"syscall"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -49,19 +46,15 @@ func (c *Controller) Run(socket string) {
 	c.logger.Info("configuring and starting the http-server begun")
 
 	c.configController()
-	go func() {
-		if err := c.contr.Start(socket); err != nil {
-			serverErr := fmt.Errorf("http-server wasn't started: %v", err)
-			c.logger.Error(serverErr.Error())
-			panic(serverErr)
-		}
-	}()
+	if err := c.contr.Start(socket); err != nil {
+		serverErr := fmt.Errorf("http-server wasn't started or was closed: %v", err)
+		c.logger.Error(serverErr.Error())
+		panic(serverErr)
+	}
+}
 
-	sig := make(chan os.Signal, 3)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-
-	<-sig
-
+// GracefulStop defines the logic of service's gracefully shutdown.
+func (c *Controller) GracefulStop() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
